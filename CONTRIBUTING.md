@@ -95,33 +95,46 @@ Todas las ramas y los mensajes de commit DEBEN ESTAR EN INGLÉS.
 
 ¿Cómo nombrar tu rama (Branch)?
 
-Usa el formato: tipo/nombre-de-la-tarea
+Formato: `<tipo>/<ID-del-ticket>-<descripcion-corta>`
 
-feat/: Si estás creando algo nuevo (ej: feat/login-form, feat/player-bar).
+| Tipo | Cuándo |
+|---|---|
+| `feature/` | Funcionalidad nueva |
+| `fix/` | Corrección de un bug |
+| `chore/` | Mantenimiento, configuración, dependencias, limpieza |
 
-fix/: Si estás arreglando un bug o algo roto (ej: fix/navbar-alignment).
+Ejemplos:
 
-chore/: Para tareas de configuración o instalar dependencias (ej: chore/install-zod).
-
-refactor/: Si estás mejorando código que ya funciona (ej: refactor/sidebar-css).
+```
+feature/RC-12-hero-section
+fix/RC-31-checkout-button-overflow
+chore/RC-40-remove-vite-boilerplate
+```
 
 ¿Cómo hacer los Commits?
 
-Seguimos el estándar Conventional Commits.
-Estructura: tipo: descripción breve en minúsculas
+- **En inglés.**
+- Siguen [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope opcional>): <description>`
+- Tipos: `feat`, `fix`, `chore`, `docs`, `style`, `refactor`, `test`, `build`, `ci`.
+- Descripción en imperativo, minúscula y sin punto final.
+- Commits chicos y con un solo propósito.
 
-✅ Ejemplos CORRECTOS:
+Ejemplos:
 
-feat: add hover effect to playlist cards
+```
+feat(hero): add main headline and call to action
+fix(checkout): prevent price from overflowing on mobile
+chore: remove unused vite assets
+docs: add design style guide
+```
 
-fix: correct blue color in play button
+## Mantener la rama actualizada: solo REBASE
 
-chore: add react-icons
+Para traer los cambios nuevos de `main` a tu rama se usa **rebase**. Nada de merge.
 
-❌ Ejemplos INCORRECTOS:
+```bash
+git pull --rebase origin main
+```
 
-arreglé el boton (En español y sin tipo).
-
-feat: Card Lista (Mayúsculas y spanglish).
-
-update files (Muy genérico y sin tipo).
+- Nunca hagas `git merge main` ni `git pull` sin `--rebase`.
+- Si hay conflictos, se resuelven durante el rebase (`git rebase --continue`).
