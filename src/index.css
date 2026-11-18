@@ -1,111 +1,47 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* ====================
+     🎨 COLORES DE MARCA
+     ==================== */
+  --primary-color: #120A8F;         /* Azul base para botones Play, checks, toggles */
+  --primary-hover: #1e14b8;         /* Azul más claro para cuando pasas el mouse */
+  --primary-active: #0a065c;        /* Azul más oscuro para cuando haces click */
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* ====================
+     🌑 FONDOS (DARK THEME)
+     ==================== */
+  --bg-base: #121212;               /* Fondo principal de la aplicación (el más oscuro) */
+  --bg-surface: #181818;            /* Fondo de la barra lateral (Sidebar) y cards base */
+  --bg-elevated: #282828;           /* Fondo de las cards cuando pasas el mouse (Hover) */
+  --bg-elevated-hover: #3E3E3E;     /* Fondo de elementos seleccionados o modales */
+  --bg-player: #000000;             /* Fondo del reproductor inferior y del Navbar al hacer scroll */
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* ====================
+     ✍️ TEXTOS E ICONOS
+     ==================== */
+  --text-primary: #FFFFFF;          /* Títulos principales, nombres de canciones (Resaltado) */
+  --text-secondary: #A7A7A7;        /* Nombres de artistas, subtítulos (Gris claro) */
+  --text-secondary-hover: #FFFFFF;  /* El gris debe volverse blanco al pasar el mouse */
+  --text-muted: #727272;            /* Textos menos importantes o fechas */
+  
+  /* ====================
+     🔤 TIPOGRAFÍA
+     ==================== */
+  --font-family: 'Inter', 'Circular Std', Helvetica, Arial, sans-serif;
+  --font-size-sm: 0.875rem;         /* 14px - Letra chica, metadatos */
+  --font-size-md: 1rem;             /* 16px - Texto normal (p) */
+  --font-size-lg: 1.125rem;         /* 18px - Títulos de cards */
+  --font-size-xl: 1.5rem;           /* 24px - Títulos de secciones */
+  --font-size-xxl: 2rem;            /* 32px - Títulos principales de playlists */
+  
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  /* ====================
+     📐 BORDES Y EFECTOS
+     ==================== */
+  --radius-sm: 4px;                 /* Para portadas de álbumes dentro de cards */
+  --radius-md: 8px;                 /* Para las tarjetas (cards) completas */
+  --radius-pill: 500px;             /* Para los botones de Play o botones de login */
+  --transition-base: 0.3s ease;     /* Para que los hovers sean suaves */
 }
