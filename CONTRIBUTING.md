@@ -138,3 +138,22 @@ git pull --rebase origin main
 
 - Nunca hagas `git merge main` ni `git pull` sin `--rebase`.
 - Si hay conflictos, se resuelven durante el rebase (`git rebase --continue`).
+
+## 🗄️ LocalStorage Service & Seed Data
+
+All `localStorage` access **must** go through `src/services/storageService.ts`. Direct calls to `localStorage` inside components are forbidden.
+
+### Storage Keys (`streaming:` prefix)
+- `streaming:users`
+- `streaming:artists`
+- `streaming:songs`
+- `streaming:playlists`
+- `streaming:plans`
+- `streaming:session` (never stores passwords)
+
+### Test Credentials (Seed)
+- **Admin:** `admin@streaming.com` / `Admin123!`
+- **User:** `demo@streaming.com` / `User123!`
+
+### Dev Reset
+To wipe `localStorage` and reload the initial seed, call `resetData()` from `src/services/storageService.ts`.
