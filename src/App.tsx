@@ -3,10 +3,13 @@ import { MainLayout} from './layouts/MainLayout';
 import { LayoutAuth } from './layouts/LayoutAuth';
 /* import { LayoutAdmin } from './layouts/LayoutAdmin'; */
 import { AdminRoute } from './components/admin/AdminRoute';
+import { AdminArtistas } from './components/admin/AdminArtist';
+import { Toaster } from 'sonner';
 
 export default function App() {
   return (
     <Routes>
+      <Toaster position="bottom-right" richColors theme="dark"/>
       {/* Rutas con Layout Principal */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<h1>Inicio</h1>} />
@@ -22,15 +25,15 @@ export default function App() {
       </Route>
 
       <Route element={<AdminRoute />}>
-  <Route path="/admin" element={<MainLayout />}>
-    <Route index element={<Navigate to="artistas" replace />} />
-    <Route path="artistas" element={<h1>Gestión de Artistas</h1>} />
-    <Route path="canciones" element={<h1>Gestión de Canciones</h1>} />
-    <Route path="playlists" element={<h1>Gestión de Playlists</h1>} />
-    <Route path="planes" element={<h1>Gestión de Planes</h1>} />
-    <Route path="usuarios" element={<h1>Gestión de Usuarios</h1>} />
-  </Route>
-</Route>
+        <Route path="/admin" element={<MainLayout />}>
+        <Route index element={<Navigate to="artistas" replace />} />
+        <Route path="artistas" element={<AdminArtistas />} />
+        <Route path="canciones" element={<h1>Gestión de Canciones</h1>} />
+        <Route path="playlists" element={<h1>Gestión de Playlists</h1>} />
+        <Route path="planes" element={<h1>Gestión de Planes</h1>} />
+        <Route path="usuarios" element={<h1>Gestión de Usuarios</h1>} />
+        </Route>
+      </Route>
     </Routes>
   );
 }
