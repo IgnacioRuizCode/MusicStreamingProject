@@ -1,0 +1,89 @@
+.layout-admin {
+  display: grid;
+  min-height: 100dvh;
+  grid-template-columns: 240px 1fr;
+  background-color: var(--bg-base, #0a0a0f);
+  color: var(--text-primary, #ffffff);
+}
+
+.admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: var(--bg-surface, #11111a);
+}
+
+.admin-brand h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.admin-back-link {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #a1a1aa);
+  text-decoration: none;
+}
+
+.admin-back-link:hover {
+  color: var(--text-primary, #ffffff);
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-nav-link {
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  color: var(--text-secondary, #a1a1aa);
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary, #ffffff);
+}
+
+.admin-nav-link.active {
+  background-color: var(--color-primary, #120a8f);
+  color: #ffffff;
+}
+
+.admin-content {
+  padding: 2rem;
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .layout-admin {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .admin-sidebar {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .admin-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .admin-nav-link {
+    white-space: nowrap;
+  }
+
+  .admin-content {
+    padding: 1rem;
+  }
+}

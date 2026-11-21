@@ -7,6 +7,7 @@ import {
  type SessionUser,
  type Song,
  type User,
+ type Role,
 } from '../types/types';
 import { SEED_DATA } from '../seed';
 
@@ -140,7 +141,7 @@ export function getSession(): SessionUser | null {
 export function saveSession(user: User | SessionUser): void {
   const safeUser = { ...user };
   delete (safeUser as Partial<User>).password;
-  save<SessionUser>(STORAGE_KEYS.session, safeUser);
+  save<SessionUser>(STORAGE_KEYS.session, safeUser); 
 }
 
 export function clearSession(): void {
@@ -202,4 +203,108 @@ export function search(term: string): {
   );
 
   return { songs, artists, playlists };
+}
+
+export function deleteArtistWithCascade(artistId: string): {
+  deletedSongsCount: number;
+} {
+  const deleted = deleteById('artists', artistId);
+  if (!deleted) {
+    throw new Error('Artista no encontrado');
+  }
+
+  const allSongs = getAll('songs');
+  const artistSongIds = new Set(
+    allSongs.filter((s) => s.artistId === artistId).map((s) => s.id)
+  );
+
+  if (artistSongIds.size > 0) {
+    save(
+      STORAGE_KEYS.songs,
+      allSongs.filter((s) => s.artistId !== artistId)
+    );
+
+    const allPlaylists = getAll('playlists');
+    const updatedPlaylists = allPlaylists.map((pl) => ({
+      ...pl,
+      songIds: pl.songIds.filter((songId) => !artistSongIds.has(songId)),
+    }));
+    save(STORAGE_KEYS.playlists, updatedPlaylists);
+  }
+
+  return { deletedSongsCount: artistSongIds.size };
+}
+
+export function countUsersByPlan(planId: string): number {
+  return getAll('users').filter((u) => u.planId === planId).length;
+}
+
+export function deletePlanSafe(planId: string): void {
+  const subscribedCount = countUsersByPlan(planId);
+  if (subscribedCount > 0) {
+    throw new Error(
+      `No se puede eliminar este plan porque tiene ${subscribedCount} usuario(s) suscripto(s).`
+    );
+  }
+  const deleted = deleteById('plans', planId);
+  if (!deleted) throw new Error('Plan no encontrado.');
+}
+
+export function addSongWithSync(newSong: Omit<Song, 'id'>): Song {
+  const created = add('songs', newSong);
+  const artists = getAll('artists');
+  const updatedArtists = artists.map((a) =>
+    a.id === created.artistId
+      ? { ...a, songIds: [...a.songIds, created.id] }
+      : a
+  );
+  save(STORAGE_KEYS.artists, updatedArtists);
+  return created;
+}
+
+export function deleteSongWithCascade(songId: string): { playlistsUpdated: number } {
+  const deleted = deleteById('songs', songId);
+  if (!deleted) throw new Error('Canción no encontrada.');
+
+  const playlists = getAll('playlists');
+  let playlistsUpdated = 0;
+  const updatedPlaylists = playlists.map((pl) => {
+    if (!pl.songIds.includes(songId)) return pl;
+    playlistsUpdated++;
+    return { ...pl, songIds: pl.songIds.filter((id) => id !== songId) };
+  });
+  if (playlistsUpdated > 0) {
+    save(STORAGE_KEYS.playlists, updatedPlaylists);
+  }
+
+  const artists = getAll('artists');
+  const updatedArtists = artists.map((a) =>
+    a.songIds.includes(songId)
+      ? { ...a, songIds: a.songIds.filter((id) => id !== songId) }
+      : a
+  );
+  save(STORAGE_KEYS.artists, updatedArtists);
+
+  return { playlistsUpdated };
+}
+
+export function updateUserAdmin(
+  targetUserId: string,
+  currentAdminId: string,
+  changes: { role: Role; planId: string | null }
+): User {
+  if (targetUserId === currentAdminId && changes.role !== 'admin') {
+    throw new Error('No podés quitarte tu propio rol de administrador.');
+  }
+  const updated = update('users', targetUserId, changes);
+  if (!updated) throw new Error('Usuario no encontrado.');
+  return updated;
+}
+
+export function deleteUserSafe(targetUserId: string, currentAdminId: string): void {
+  if (targetUserId === currentAdminId) {
+    throw new Error('No podés eliminar tu propia cuenta de administrador.');
+  }
+  const deleted = deleteById('users', targetUserId);
+  if (!deleted) throw new Error('Usuario no encontrado.');
 }
