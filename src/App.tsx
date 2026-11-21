@@ -1,6 +1,8 @@
-import { Routes, Route } from 'react-router-dom';
-import { MainLayout } from './layouts/MainLayout';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { MainLayout} from './layouts/MainLayout';
 import { LayoutAuth } from './layouts/LayoutAuth';
+/* import { LayoutAdmin } from './layouts/LayoutAdmin'; */
+import { AdminRoute } from './components/admin/AdminRoute';
 
 export default function App() {
   return (
@@ -19,8 +21,16 @@ export default function App() {
         <Route path="/register" element={<h1>Registro</h1>} />
       </Route>
 
-      {/* Rutas de Admin (reemplazar por <LayoutAdmin /> cuando exista) */}
-      <Route path="/admin/*" element={<h1>Panel de Admin</h1>} />
+      <Route element={<AdminRoute />}>
+  <Route path="/admin" element={<MainLayout />}>
+    <Route index element={<Navigate to="artistas" replace />} />
+    <Route path="artistas" element={<h1>Gestión de Artistas</h1>} />
+    <Route path="canciones" element={<h1>Gestión de Canciones</h1>} />
+    <Route path="playlists" element={<h1>Gestión de Playlists</h1>} />
+    <Route path="planes" element={<h1>Gestión de Planes</h1>} />
+    <Route path="usuarios" element={<h1>Gestión de Usuarios</h1>} />
+  </Route>
+</Route>
     </Routes>
   );
 }
