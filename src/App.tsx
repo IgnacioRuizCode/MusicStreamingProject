@@ -1,4 +1,5 @@
 import './App.css';
+import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './componets/AuthContext';
 import { Navbar } from './componets/navbar/navbar';
 
@@ -7,15 +8,11 @@ function App () {
     console.log('Toggle sidebar');
   };
   return (
-    <AuthProvider>
-    <Navbar onToggleSidebar={handleTggleSidebar}/>
-    <main>
-      <h1>Music Streaming App</h1>
-    </main>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <Navbar onToggleSidebar={handleTggleSidebar} />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
-  <main>
-      <h1>Music Streaming App</h1>
-  </main>
 export default App;

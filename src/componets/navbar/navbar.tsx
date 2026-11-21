@@ -6,7 +6,7 @@ import { Brand } from '../ui/Brand'
 import { IconButton } from '../ui/IconButton'
 import { NavbarLogueado } from '../navbar/NavbarLogueado'
 import { NavbarNoLogueado } from '../navbar/NavbarNoLogueado'
-import './Navbar.css'
+import './navbar.css'
 
 interface NavbarProps {
   onToggleSidebar: () => void

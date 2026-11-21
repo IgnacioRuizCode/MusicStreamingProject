@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Plan } from '@/tipos'
+import type { Plan } from '../types'
 
 export const paymentSchema = z.object({
   cardHolder: z.string().trim().min(3, 'Ingresá el nombre del titular'),

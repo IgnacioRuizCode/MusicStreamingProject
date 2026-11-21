@@ -1,9 +1,9 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
-import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { seedPlaylists, seedSongs } from '@/seed'
-import { storageKeys } from '@/servicios/localStorage'
-import type { Playlist, Song } from '@/tipos'
-import { createId } from '@/utils'
+import { useLocalStorage } from '../hooks/useLocalStorage'
+import { seedPlaylists, seedSongs } from '../seed/index2'
+import { storageKeys } from '../services/localStorage'
+import type { Playlist, Song } from '../types'
+import { createId } from '../utils'
 
 interface LibraryContextValue {
   songs: Song[]
