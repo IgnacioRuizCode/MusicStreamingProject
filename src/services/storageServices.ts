@@ -203,3 +203,33 @@ export function search(term: string): {
 
   return { songs, artists, playlists };
 }
+
+export function deleteArtistWithCascade(artistId: string): {
+  deletedSongsCount: number;
+} {
+  const deleted = deleteById('artists', artistId);
+  if (!deleted) {
+    throw new Error('Artista no encontrado');
+  }
+
+  const allSongs = getAll('songs');
+  const artistSongIds = new Set(
+    allSongs.filter((s) => s.artistId === artistId).map((s) => s.id)
+  );
+
+  if (artistSongIds.size > 0) {
+    save(
+      STORAGE_KEYS.songs,
+      allSongs.filter((s) => s.artistId !== artistId)
+    );
+
+    const allPlaylists = getAll('playlists');
+    const updatedPlaylists = allPlaylists.map((pl) => ({
+      ...pl,
+      songIds: pl.songIds.filter((songId) => !artistSongIds.has(songId)),
+    }));
+    save(STORAGE_KEYS.playlists, updatedPlaylists);
+  }
+
+  return { deletedSongsCount: artistSongIds.size };
+}

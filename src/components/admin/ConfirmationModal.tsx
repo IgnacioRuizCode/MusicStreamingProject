@@ -7,7 +7,7 @@ interface ModalConfirmacionProps {
   onCancelar: () => void;
 }
 
-export function ModalConfirmacion({
+export function ConfirmationModal({
   abierto,
   titulo,
   mensaje,
