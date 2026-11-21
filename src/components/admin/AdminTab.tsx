@@ -15,7 +15,7 @@ interface TablaAdminProps<T extends { id: string }> {
   accionVacio?: ReactNode;
 }
 
-export function TablaAdmin<T extends { id: string }>({
+export function AdminTab<T extends { id: string }>({
   columnas,
   datos,
   renderAcciones,
