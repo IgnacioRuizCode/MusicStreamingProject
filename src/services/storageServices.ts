@@ -140,7 +140,7 @@ export function getSession(): SessionUser | null {
 export function saveSession(user: User | SessionUser): void {
   const safeUser = { ...user };
   delete (safeUser as Partial<User>).password;
-  save<SessionUser>(STORAGE_KEYS.session, safeUser);
+  save<SessionUser>(STORAGE_KEYS.session, safeUser); 
 }
 
 export function clearSession(): void {
