@@ -1,0 +1,56 @@
+.formulario-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formulario-plan__input {
+  width: 100%;
+}
+
+.formulario-plan__error {
+  color: #f87171;
+  font-size: 0.85rem;
+}
+
+.formulario-plan__error--small {
+  color: #f87171;
+  font-size: 0.8rem;
+}
+
+.formulario-plan__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.formulario-plan__beneficios-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.formulario-plan__beneficios-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formulario-plan__beneficio-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.formulario-plan__beneficio-campo {
+  flex: 1;
+}
+
+.formulario-plan__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}

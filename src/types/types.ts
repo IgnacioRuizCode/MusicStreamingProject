@@ -13,6 +13,7 @@ export interface User {
   birthDate: string; 
   role: Role;
   planId: string | null;
+  createdAt?: string;
   card?: Card;
   savedPlaylists: string[];
   followedArtists: string[];
@@ -63,3 +64,23 @@ export interface CollectionMap {
 }
 
 export type CollectionName = keyof CollectionMap;
+
+export interface RegisterData {
+  username: string;
+  email: string;
+  password: string;
+  birthDate: string;
+}
+
+export type AuthResult =
+  | { success: true; user?: SessionUser }
+  | { success: false; error: string };
+
+export interface AuthContextType {
+  user: SessionUser | null;
+  loading: boolean;
+  register: (data: RegisterData) => AuthResult;
+  login: (email: string, password: string) => AuthResult;
+  logout: () => void;
+  subscribe: (planId: string) => AuthResult;
+}
