@@ -1,13 +1,11 @@
 import { Link } from 'react-router-dom'
-import { AudioLines } from 'lucide-react'
+import logo from '../../assets/logo.png'
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   return (
-    <Link to="/" className="brand" aria-label="Soundwave home">
-      <span className="brand__mark">
-        <AudioLines size={compact ? 20 : 24} aria-hidden="true" />
-      </span>
-      {!compact && <span className="brand__name">soundwave</span>}
+    <Link to="/" className="brand" aria-label="Music Streaming App home">
+      <img src={logo} alt="" className="brand__mark" aria-hidden="true" />
+      {!compact && <span className="brand__name">Music Streaming App</span>}
     </Link>
   )
 }

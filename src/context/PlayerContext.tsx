@@ -8,9 +8,9 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { storageKeys } from '@/servicios/localStorage'
-import type { Song } from '@/tipos'
+import { useLocalStorage } from '../hooks/useLocalStorage'
+import { storageKeys } from '../services/localStorage'
+import type { Song } from '../types'
 
 interface PlayerContextValue {
   currentSong: Song | null

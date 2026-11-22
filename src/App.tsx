@@ -1,3 +1,12 @@
+import './App.css';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './componets/AuthContext';
+import { Navbar } from './componets/navbar/navbar';
+
+function App () {
+  const handleTggleSidebar = () => {
+    console.log('Toggle sidebar');
+  };
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout} from './layouts/MainLayout';
 import { LayoutAuth } from './layouts/LayoutAuth';
@@ -8,6 +17,15 @@ import { Toaster } from 'sonner';
 
 export default function App() {
   return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Navbar onToggleSidebar={handleTggleSidebar} />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+export default App;
+
     <Routes>
       <Toaster position="bottom-right" richColors theme="dark"/>
       {/* Rutas con Layout Principal */}

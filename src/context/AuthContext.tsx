@@ -4,7 +4,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage'
 import { seedUsers } from '../seed/index2'
 import { storageKeys } from '../services/localStorage'
 import type { PlanId, User } from '../types'
-import { createId } from '../util'
+import { createId } from '../utils'
 
 interface AuthContextValue {
   user: User | null

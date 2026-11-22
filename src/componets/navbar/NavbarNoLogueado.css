@@ -2,6 +2,20 @@
   gap: 16px;
 }
 
+.navbar__guest-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar__link--muted {
+  margin-left: 16px;
+}
+
+.navbar__guest-links .btn {
+  margin-left: 16px;
+}
+
 .navbar__mobile-toggle {
   display: none;
 }

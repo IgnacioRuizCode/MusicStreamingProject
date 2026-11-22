@@ -20,6 +20,22 @@
   min-width: 0;
 }
 
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+.brand__mark {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 .navbar__menu {
   display: none;
 }
@@ -44,7 +60,7 @@
 .navbar__link {
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   transition: color var(--transition-base);
 }
 
@@ -53,6 +69,7 @@
 }
 
 .navbar__link--muted {
+  color: var(--text-muted);
   font-weight: var(--font-weight-regular);
 }
 
