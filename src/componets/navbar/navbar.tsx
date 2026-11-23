@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ArrowLeft, ArrowRight, Home, Menu } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 import { Brand } from '../ui/Brand'
 import { IconButton } from '../ui/IconButton'
 import { NavbarLogueado } from '../navbar/NavbarLogueado'

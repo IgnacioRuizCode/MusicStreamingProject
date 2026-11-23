@@ -1,11 +1,15 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-{/* Placeholder: reemplazar por import de navbar */}
+import { Navbar } from '../componets/navbar/navbar';
 import './MainLayout.css';
 
 export function MainLayout() {
   const contentRef = useRef<HTMLDivElement>(null);
   const { pathname } = useLocation();
+
+  const handleToggleSidebar = () => {
+    console.log('Toggle sidebar');
+  };
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: 'instant' });
@@ -14,8 +18,7 @@ export function MainLayout() {
   return (
     <div className="layout-principal">
       <header className="layout-navbar">
-        {/* TODO: reemplazar por <Navbar /> cuando esté mergeado */}
-        <p style={{ padding: '0 1.5rem', lineHeight: '64px', margin: 0 }}>Navbar</p>
+        <Navbar onToggleSidebar={handleToggleSidebar} />
       </header>
 
       <aside className="layout-sidebar">

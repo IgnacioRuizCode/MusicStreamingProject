@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { readStorage, writeStorage } from '../services/localStorage'
+import { read, save } from '../services/storageServices'
+import type { StorageKey } from '../services/storageKeys'
 
-export function useLocalStorage<T>(key: string, initialValue: T) {
-  const [value, setValue] = useState<T>(() => readStorage(key, initialValue))
+export function useLocalStorage<T>(key: StorageKey, initialValue: T) {
+  const [value, setValue] = useState<T>(() => read(key, initialValue))
 
   useEffect(() => {
-    writeStorage(key, value)
+    save(key, value)
   }, [key, value])
 
   return [value, setValue] as const

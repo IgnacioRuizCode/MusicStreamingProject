@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, LogOut, Search, Shield, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { CoverImage } from '../ui/CoverImage'
 import { IconButton } from '../ui/IconButton'
-import { useAuth } from '../AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 import './NavbarLogueado.css'
 
 interface NavbarLogueadoProps {
@@ -12,11 +11,14 @@ interface NavbarLogueadoProps {
 }
 
 export function NavbarLogueado({ query, onQueryChange }: NavbarLogueadoProps) {
-  const { user, isAdmin, isPremium, logout } = useAuth()
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+
+  const isAdmin = user?.role === 'admin'
+  const isPremium = Boolean(user?.planId) && user?.planId !== 'plan-free'
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -39,7 +41,7 @@ export function NavbarLogueado({ query, onQueryChange }: NavbarLogueadoProps) {
           event.preventDefault()
           const trimmed = query.trim()
           if (trimmed) {
-            navigate(`/busqueda?q=${encodeURIComponent(trimmed)}`)
+            navigate(`/search?q=${encodeURIComponent(trimmed)}`)
             setSearchOpen(false)
           }
         }}
@@ -73,8 +75,10 @@ export function NavbarLogueado({ query, onQueryChange }: NavbarLogueadoProps) {
           onClick={() => setMenuOpen((value) => !value)}
           aria-expanded={menuOpen}
         >
-          <CoverImage src={user?.avatar ?? ''} alt="" className="user-menu__avatar" />
-          <span className="user-menu__name">{user?.name}</span>
+          <span className="user-menu__avatar" aria-hidden="true">
+            {user?.username?.charAt(0).toUpperCase() ?? '?'}
+          </span>
+          <span className="user-menu__name">{user?.username}</span>
           <ChevronDown size={16} aria-hidden="true" />
         </button>
         {menuOpen && (
