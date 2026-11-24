@@ -7,7 +7,7 @@ import { loginSchema, type LoginValues } from '../schemas/auth';
 import { useAuth } from '../hooks/useAuth';
 import { FormField } from '../components/auth/FormField';
 import { PasswordField } from '../components/auth/PasswordField';
-import './LoginPage.css';
+import './AuthPages.css';
 
 interface LocationState {
   from?: { pathname?: string };
