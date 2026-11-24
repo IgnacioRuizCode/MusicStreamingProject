@@ -32,7 +32,7 @@ export function NavbarNoLogueado() {
         <Link to="/login" className="navbar__link navbar__link--muted">
           Iniciar sesión
         </Link>
-        <Link to="/registro" className="btn btn--primary btn--sm">
+        <Link to="/register" className="btn btn--primary btn--sm">
           Registrarse
         </Link>
       </nav>
@@ -53,7 +53,7 @@ export function NavbarNoLogueado() {
             <Link to="/ayuda" className="navbar__mobile-link" onClick={closeMenu}>
               Ayuda
             </Link>
-            <Link to="/registro" className="navbar__mobile-link" onClick={closeMenu}>
+            <Link to="/register" className="navbar__mobile-link" onClick={closeMenu}>
               Registrarse
             </Link>
           </div>

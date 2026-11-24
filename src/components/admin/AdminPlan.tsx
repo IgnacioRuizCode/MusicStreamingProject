@@ -13,7 +13,7 @@ import {
   deletePlanSafe,
   countUsersByPlan,
 } from '../../services/storageServices';
-import './AdminPlanes.css';
+import './AdminPlan.css';
 
 const FILAS_POR_PAGINA = 10;
 

@@ -3,7 +3,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { planSchema, type PlanFormData } from '../../schemas/planSchema';
 import type { Plan } from '../../types/types';
-import './FormularioPlan.css';
+import './PlanForm.css';
 
 interface FormularioPlanProps {
   valoresIniciales?: Plan | null;

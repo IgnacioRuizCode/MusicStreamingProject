@@ -1,114 +1,160 @@
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
-import type { RegisterValues } from '../schemas'
-import { useLocalStorage } from '../hooks/useLocalStorage'
-import { seedUsers } from '../seed/index2'
-import { storageKeys } from '../services/localStorage'
-import type { PlanId, User } from '../types'
-import { createId } from '../utils'
+import { createContext, useEffect, useState, type ReactNode } from 'react';
+import { z } from 'zod';
+import {
+  add,
+  clearSession,
+  getById,
+  getSession,
+  getUserByEmail,
+  saveSession,
+  update,
+} from '../services/storageServices';
+import type {
+  AuthContextType,
+  AuthResult,
+  RegisterData,
+  SessionUser,
+  User,
+} from '../types/types';
 
-interface AuthContextValue {
-  user: User | null
-  users: User[]
-  isAdmin: boolean
-  isPremium: boolean
-  plan: PlanId
-  selectPlan: (plan: PlanId) => void
-  login: (email: string, password: string) => string | null
-  register: (values: RegisterValues) => string | null
-  logout: () => void
-  deleteUser: (id: string) => void
+const storedSessionSchema = z.object({
+  id: z.string().min(1),
+});
+
+function toSessionUser(user: User): SessionUser {
+  const safeUser = { ...user };
+  delete (safeUser as Partial<User>).password;
+  return safeUser;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined)
+// eslint-disable-next-line react-refresh/only-export-components
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [users, setUsers] = useLocalStorage<User[]>(storageKeys.users, seedUsers)
-  const [user, setUser] = useLocalStorage<User | null>(storageKeys.session, null)
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-  const login = useCallback(
-    (email: string, password: string): string | null => {
-      const normalized = email.trim().toLowerCase()
-      const found = users.find((item) => item.email.toLowerCase() === normalized)
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<SessionUser | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-      if (!found || found.password !== password) {
-        return 'Correo o contraseña incorrectos'
+  useEffect(() => {
+    queueMicrotask(() => {
+      try {
+        const rawSession = getSession();
+        if (!rawSession) return;
+
+        const parsed = storedSessionSchema.safeParse(rawSession);
+        if (!parsed.success) {
+          clearSession();
+          return;
+        }
+
+        const freshUser = getById('users', parsed.data.id);
+        if (!freshUser) {
+          clearSession();
+          return;
+        }
+
+        setUser(toSessionUser(freshUser));
+      } catch {
+        clearSession();
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
+    });
+  }, []);
 
-      setUser(found)
-      return null
-    },
-    [setUser, users],
-  )
+  const register = (data: RegisterData): AuthResult => {
+    const normalizedEmail = data.email.trim().toLowerCase();
+    const existingUser = getUserByEmail(normalizedEmail);
 
-  const register = useCallback(
-    (values: RegisterValues): string | null => {
-      const email = values.email.trim().toLowerCase()
-      const exists = users.some((item) => item.email.toLowerCase() === email)
+    if (existingUser) {
+      return {
+        success: false,
+        error: 'Ya existe una cuenta registrada con ese correo electrónico.',
+      };
+    }
 
-      if (exists) {
-        return 'Ya existe una cuenta con ese correo'
-      }
-
-      const newUser: User = {
-        id: createId('user'),
-        name: values.name.trim(),
-        email,
-        password: values.password,
+    const newUser = add('users', {
+        username: data.username.trim(),
+        email: normalizedEmail,
+        password: data.password,
         role: 'user',
-        avatar: `https://picsum.photos/seed/${encodeURIComponent(email)}/200/200`,
-        plan: 'free',
-      }
+        planId: null,
+        savedPlaylists: [],
+        followedArtists: [],
+        createdAt: new Date().toISOString(),
+        birthDate: data.birthDate,
+    });
 
-      setUsers((previous) => [...previous, newUser])
-      setUser(newUser)
-      return null
-    },
-    [setUser, setUsers, users],
-  )
+    const safeUser = toSessionUser(newUser);
+    saveSession(safeUser);
+    setUser(safeUser);
 
-  const logout = useCallback(() => setUser(null), [setUser])
+    return { success: true, user: safeUser };
+  };
 
-  const selectPlan = useCallback(
-    (plan: PlanId) => {
-      setUser((previous) => (previous ? { ...previous, plan } : previous))
-      setUsers((previous) =>
-        previous.map((item) => (item.id === user?.id ? { ...item, plan } : item)),
-      )
-    },
-    [setUser, setUsers, user?.id],
-  )
+  const login = (email: string, password: string): AuthResult => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const foundUser = getUserByEmail(normalizedEmail);
 
-  const deleteUser = useCallback(
-    (id: string) => {
-      setUsers((previous) => previous.filter((item) => item.id !== id))
-      setUser((previous) => (previous?.id === id ? null : previous))
-    },
-    [setUser, setUsers],
-  )
+    if (!foundUser || foundUser.password !== password) {
+      return {
+        success: false,
+        error: 'Credenciales incorrectas. Verificá tu correo y contraseña.',
+      };
+    }
 
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      user,
-      users,
-      isAdmin: user?.role === 'admin',
-      isPremium: user?.plan === 'premium' || user?.plan === 'family',
-      plan: user?.plan ?? 'free',
-      selectPlan,
-      login,
-      register,
-      logout,
-      deleteUser,
-    }),
-    [deleteUser, login, logout, register, selectPlan, user, users],
-  )
+    const safeUser = toSessionUser(foundUser);
+    saveSession(safeUser);
+    setUser(safeUser);
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
+    return { success: true, user: safeUser };
+  };
 
-export function useAuth(): AuthContextValue {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used inside AuthProvider')
-  }
-  return context
+  const logout = (): void => {
+    clearSession();
+    setUser(null);
+  };
+
+  const subscribe = (planId: string): AuthResult => {
+    if (!user) {
+      return {
+        success: false,
+        error: 'Debés iniciar sesión para suscribirte a un plan.',
+      };
+    }
+
+    const plan = getById('plans', planId);
+    if (!plan) {
+      return {
+        success: false,
+        error: 'El plan seleccionado no existe.',
+      };
+    }
+
+    const updatedUser = update('users', user.id, { planId: planId });
+    if (!updatedUser) {
+      return {
+        success: false,
+        error: 'No se pudo actualizar la suscripción.',
+      };
+    }
+
+    const safeUser = toSessionUser(updatedUser);
+    saveSession(safeUser);
+    setUser(safeUser);
+
+    return { success: true, user: safeUser };
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{ user, loading, register, login, logout, subscribe }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }

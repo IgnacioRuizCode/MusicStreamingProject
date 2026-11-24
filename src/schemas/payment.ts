@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Plan } from '../types'
+import type { Plan } from '../types/types'
 
 export const paymentSchema = z.object({
   cardHolder: z.string().trim().min(3, 'Ingresá el nombre del titular'),
@@ -21,27 +21,31 @@ export type PaymentValues = z.infer<typeof paymentSchema>
 
 export const plans: Plan[] = [
   {
-    id: 'free',
+    id: 'plan-free',
     name: 'Free',
     price: 0,
-    description: 'Escuchá música sin costo, con anuncios.',
-    features: ['Catálogo completo', 'Playlist personal', 'Reproducción simulada'],
+    benefits: ['Ad-supported music', 'Shuffle play', 'Standard audio quality'],
     featured: false,
   },
   {
-    id: 'premium',
-    name: 'Premium',
+    id: 'plan-individual',
+    name: 'Individual',
     price: 9.99,
-    description: 'Toda la música, sin interrupciones.',
-    features: ['Sin anuncios', 'Descargas offline', 'Calidad alta', 'Canciones ilimitadas'],
+    benefits: ['Ad-free music', 'Download to listen offline', 'High audio quality', 'Cancel anytime'],
     featured: true,
   },
   {
-    id: 'family',
+    id: 'plan-duo',
+    name: 'Duo',
+    price: 12.99,
+    benefits: ['2 Premium accounts', 'Ad-free music', 'Offline playback', 'Duo Mix playlist'],
+    featured: false,
+  },
+  {
+    id: 'plan-family',
     name: 'Family',
-    price: 14.99,
-    description: 'Hasta 6 cuentas para toda la familia.',
-    features: ['6 cuentas', 'Playlist familiar', 'Control parental', 'Sin anuncios'],
+    price: 15.99,
+    benefits: ['Up to 6 Premium accounts', 'Block explicit music', 'Ad-free music', 'Offline playback'],
     featured: false,
   },
 ]
