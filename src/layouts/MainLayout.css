@@ -1,8 +1,10 @@
 .layout-principal {
+  --sidebar-width: 280px;
+
   display: grid;
   height: 100dvh;
   overflow: hidden;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: var(--sidebar-width) 1fr;
   grid-template-rows: 64px 1fr auto;
   grid-template-areas:
     "navbar navbar"
@@ -19,9 +21,14 @@
 
 .layout-sidebar {
   grid-area: sidebar;
-  overflow-y: auto;
-  padding: 1rem;
+  min-height: 0;
+  overflow: hidden;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: var(--bg-base, #0a0a0f);
+}
+
+.layout-sidebar-overlay {
+  display: none;
 }
 
 .layout-content {
@@ -64,10 +71,6 @@
   .layout-principal {
     grid-template-columns: 72px 1fr;
   }
-
-  .layout-sidebar {
-    padding: 1rem 0.5rem;
-  }
 }
 
 @media (max-width: 768px) {
@@ -82,7 +85,28 @@
   }
 
   .layout-sidebar {
-    display: none;
+    position: fixed;
+    top: var(--navbar-height);
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    width: min(280px, 85vw);
+    transform: translateX(-100%);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.55);
+    transition: transform var(--transition-base, 0.3s ease);
+  }
+
+  .layout-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .layout-sidebar-overlay {
+    position: fixed;
+    inset: var(--navbar-height) 0 0;
+    z-index: 35;
+    display: block;
+    border: 0;
+    background: rgba(0, 0, 0, 0.6);
   }
 
   .layout-page {

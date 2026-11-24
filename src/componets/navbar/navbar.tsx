@@ -20,7 +20,11 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
   return (
     <header className="navbar">
       <div className="navbar__left">
-        <IconButton label="Toggle navigation" onClick={onToggleSidebar} className="navbar__menu">
+        <IconButton
+          label="Toggle navigation"
+          onClick={onToggleSidebar}
+          className="navbar__menu navbar__mobile-menu"
+        >
           <Menu size={22} />
         </IconButton>
         <Brand />

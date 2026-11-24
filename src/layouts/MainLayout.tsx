@@ -1,30 +1,41 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from '../componets/navbar/navbar';
+import { Sidebar } from '../components/Sidebar/Sidebar';
 import './MainLayout.css';
 
 export function MainLayout() {
   const contentRef = useRef<HTMLDivElement>(null);
   const { pathname } = useLocation();
-
-  const handleToggleSidebar = () => {
-    console.log('Toggle sidebar');
-  };
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   }, [pathname]);
 
   return (
-    <div className="layout-principal">
+    <div className={`layout-principal${sidebarOpen ? ' sidebar-open' : ''}`}>
       <header className="layout-navbar">
-        <Navbar onToggleSidebar={handleToggleSidebar} />
+        <Navbar onToggleSidebar={() => setSidebarOpen((value) => !value)} />
       </header>
 
-      <aside className="layout-sidebar">
-        {/* Placeholder: reemplazar por <Sidebar /> */}
-        <p>Sidebar</p>
+      <aside
+        className={`layout-sidebar${sidebarOpen ? ' is-open' : ''}`}
+        onClick={(event) => {
+          if ((event.target as Element).closest('a')) {
+            setSidebarOpen(false);
+          }
+        }}
+      >
+        <Sidebar />
       </aside>
+
+      <button
+        type="button"
+        className="layout-sidebar-overlay"
+        aria-label="Cerrar menú"
+        onClick={() => setSidebarOpen(false)}
+      />
 
       <main className="layout-content" ref={contentRef}>
         <div className="layout-page">
