@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Home, LibraryBig, Plus, Search } from 'lucide-react'
-import { useAuth } from '../../componets/AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 import {
   getAll,
   getById,

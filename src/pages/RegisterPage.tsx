@@ -7,7 +7,7 @@ import { registerSchema, type RegisterValues } from '../schemas/auth';
 import { useAuth } from '../hooks/useAuth';
 import { FormField } from '../components/auth/FormField';
 import { PasswordField } from '../components/auth/PasswordField';
-import './LoginPage.css';
+import './AuthPages.css';
 
 export function RegisterPage() {
   const { user, register: registerUser } = useAuth();
