@@ -10,6 +10,7 @@ import { AdminArtistas } from './components/admin/AdminArtist';
 import { AdminPlanes } from './components/admin/AdminPlan';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { HomePage } from './pages/HomePage';
 import './App.css';
 
 export default function App() {
@@ -20,7 +21,7 @@ export default function App() {
         <Routes>
           {/* Rutas principales con Navbar, Sidebar y Player */}
           <Route element={<MainLayout />}>
-            <Route path="/" element={<h1>Inicio</h1>} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<h1>Buscar</h1>} />
             <Route path="/busqueda" element={<Navigate to="/search" replace />} />
             <Route path="/library" element={<h1>Biblioteca</h1>} />
