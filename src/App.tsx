@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { AuthProvider } from './context/authContext';
+import { AuthProvider } from './context/AuthContext';
 import { PlayerProvider } from './context/PlayerContext';
 import { MainLayout } from './layouts/MainLayout';
 import { LayoutAuth } from './layouts/LayoutAuth';
