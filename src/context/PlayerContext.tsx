@@ -10,7 +10,8 @@ import {
 import type { Song } from '../types/types';
 import { getById } from '../services/storageServices';
 
-type PlayableSong = Song & { url?: string; audioUrl?: string };
+export type PlayableSong = Song & { url?: string; audioUrl?: string };
+export type RepeatMode = 'off' | 'all' | 'one';
 
 export interface PlayerContextType {
   currentSong: PlayableSong | null;
@@ -21,8 +22,11 @@ export interface PlayerContextType {
   volume: number;
   isMuted: boolean;
   isFloating: boolean;
+  isShuffle: boolean;
+  repeatMode: RepeatMode;
   playSong: (song: PlayableSong, nextQueue?: PlayableSong[]) => void;
   playSongById: (songId: string, nextQueue?: PlayableSong[]) => PlayableSong | undefined;
+  removeFromQueue: (songId: string) => void;
   togglePlay: () => void;
   pause: () => void;
   next: () => void;
@@ -30,6 +34,8 @@ export interface PlayerContextType {
   seek: (seconds: number) => void;
   changeVolume: (value: number) => void;
   toggleMute: () => void;
+  toggleShuffle: () => void;
+  cycleRepeatMode: () => void;
   setFloating: (floating: boolean) => void;
   toggleFloating: () => void;
 }
@@ -48,6 +54,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [volume, setVolume] = useState(0.7);
   const [isMuted, setIsMuted] = useState(false);
   const [isFloating, setIsFloating] = useState(false);
+  const [isShuffle, setIsShuffle] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<RepeatMode>('off');
 
   useEffect(() => {
     const audio = new Audio();
@@ -87,7 +95,42 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    if (repeatMode === 'one') {
+      setProgress(0);
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
+      setIsPlaying(true);
+      return;
+    }
+
     const index = queue.findIndex((song) => song.id === currentSong.id);
+
+    if (isShuffle && queue.length > 1) {
+      let randomIndex = index;
+      while (randomIndex === index) {
+        randomIndex = Math.floor(Math.random() * queue.length);
+      }
+      const randomSong = queue[randomIndex];
+      setCurrentSong(randomSong);
+      setProgress(0);
+      setDuration(randomSong.duration || 0);
+      setIsPlaying(true);
+      return;
+    }
+
+    const isLastSong = index === queue.length - 1;
+    if (isLastSong && repeatMode === 'off') {
+      setIsPlaying(false);
+      setProgress(0);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      return;
+    }
+
     const nextIndex = index === -1 ? 0 : (index + 1) % queue.length;
     const nextSong = queue[nextIndex];
 
@@ -97,7 +140,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setDuration(nextSong.duration || 0);
       setIsPlaying(true);
     }
-  }, [currentSong, queue]);
+  }, [currentSong, queue, isShuffle, repeatMode]);
 
   const previous = useCallback(() => {
     if (!currentSong) return;
@@ -150,8 +193,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.src = src;
       audio.load();
       if (isPlaying) {
-        audio.play().catch(() => {
-        });
+        audio.play().catch(() => {});
       }
     } else {
       audio.removeAttribute('src');
@@ -193,6 +235,52 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return () => window.clearInterval(timer);
   }, [isPlaying, currentSong, duration, next]);
 
+  // Integración nativa con controles multimedia de Windows / Chrome
+  useEffect(() => {
+    if (!currentSong || typeof navigator === 'undefined' || !('mediaSession' in navigator)) {
+      return;
+    }
+
+    const artistName =
+      getById('artists', currentSong.artistId)?.name ?? currentSong.artistId;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentSong.title,
+      artist: artistName,
+      artwork: currentSong.cover
+        ? [{ src: currentSong.cover, sizes: '512x512', type: 'image/jpeg' }]
+        : [],
+    });
+
+    navigator.mediaSession.setActionHandler('play', () => setIsPlaying(true));
+    navigator.mediaSession.setActionHandler('pause', () => setIsPlaying(false));
+    navigator.mediaSession.setActionHandler('nexttrack', next);
+    navigator.mediaSession.setActionHandler('previoustrack', previous);
+  }, [currentSong, next, previous]);
+
+  // Atajo global con barra espaciadora (Space)
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code !== 'Space') return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (!currentSong) return;
+      event.preventDefault();
+      setIsPlaying((prev) => !prev);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentSong]);
+
   const playSong = useCallback((song: PlayableSong, nextQueue?: PlayableSong[]) => {
     setCurrentSong(song);
     setDuration(song.duration || 0);
@@ -215,6 +303,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     },
     [playSong],
   );
+
+  const removeFromQueue = useCallback((songId: string) => {
+    setQueue((prev) => prev.filter((item) => item.id !== songId));
+  }, []);
 
   const togglePlay = useCallback(() => {
     if (!currentSong) return;
@@ -261,6 +353,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }, [isMuted, volume, changeVolume]);
 
+  const toggleShuffle = useCallback(() => {
+    setIsShuffle((prev) => !prev);
+  }, []);
+
+  const cycleRepeatMode = useCallback(() => {
+    setRepeatMode((prev) => (prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off'));
+  }, []);
+
   const toggleFloating = useCallback(() => {
     setIsFloating((prev) => !prev);
   }, []);
@@ -276,8 +376,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         volume,
         isMuted,
         isFloating,
+        isShuffle,
+        repeatMode,
         playSong,
         playSongById,
+        removeFromQueue,
         togglePlay,
         pause,
         next,
@@ -285,6 +388,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         seek,
         changeVolume,
         toggleMute,
+        toggleShuffle,
+        cycleRepeatMode,
         setFloating: setIsFloating,
         toggleFloating,
       }}
