@@ -29,11 +29,9 @@ function PaginaPlaylist() {
     );
   }
 
-  // Obtenemos las canciones y artistas
   const canciones = getPlaylistSongs(playlist.id);
   const artistas = getAll('artists');
 
-  // Buscamos el nombre del artista
   const obtenerArtista = (artistId: string) => {
     return (
       artistas.find((artista) => artista.id === artistId)?.name
@@ -50,7 +48,6 @@ function PaginaPlaylist() {
       .padStart(2, '0')}`;
   };
 
-  // Calculamos la duración total
   const duracionTotal = canciones.reduce(
     (total, cancion) => total + cancion.duration,
     0
