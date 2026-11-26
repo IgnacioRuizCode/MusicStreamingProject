@@ -1,39 +1,72 @@
 
-import './App.css';
-import MusicPlayer from './components/MusicPlayer';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-import PaginaPlaylist from './.pages/PaginaPlaylist';
+import { useEffect } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { AuthProvider } from './context/AuthContext';
+import { PlayerProvider } from './context/PlayerContext';
+import { initializeData } from './services/storageServices';
+import { hydrateCatalogWithRealMedia } from './services/musicApiService';
+import { MainLayout } from './layouts/MainLayout';
+import { LayoutAuth } from './layouts/LayoutAuth';
+import { LayoutAdmin } from './layouts/AdminLayout';
+import { AdminRoute } from './components/admin/AdminRoute';
+import { AdminArtistas } from './components/admin/AdminArtist';
+import { AdminPlanes } from './components/admin/AdminPlan';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { HomePage } from './pages/HomePage';
+import { SearchPage } from './pages/SearchPage';
+import PaginaPlaylist from './pages/PaginaPlaylist';
 import PaginaArtista from './.pages/PaginaArtista';
+import './App.css';
 
-function App() {
+export default function App() {
+  useEffect(() => {
+    initializeData();
+    hydrateCatalogWithRealMedia();
+  }, []);
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <main>
-              <h1>CODIFY</h1>
-              <p>Bienvenido a nuestra plataforma musical.</p>
-            </main>
-          }
-        />
+    <AuthProvider>
+      <PlayerProvider>
+        <Toaster position="bottom-right" richColors theme="dark" />
+        <Routes>
+          {/* Rutas principales */}
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="search" element={<SearchPage />} />
+            <Route path="busqueda" element={<Navigate to="/search" replace />} />
+            <Route path="library" element={<h1>Biblioteca</h1>} />
+            <Route path="planes" element={<h1>Planes</h1>} />
+            <Route path="perfil" element={<h1>Perfil</h1>} />
+            <Route path="ayuda" element={<h1>Ayuda</h1>} />
+            <Route path="artista/:id" element={<PaginaArtista />} />
+            <Route path="playlist/:id" element={<PaginaPlaylist />} />
+          </Route>
 
-        <Route
-          path="/playlist/:id"
-          element={<PaginaPlaylist />}
-        />
+          {/* Rutas de autenticación */}
+          <Route element={<LayoutAuth />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/registro" element={<RegisterPage />} />
+            <Route path="/register" element={<Navigate to="/registro" replace />} />
+          </Route>
 
-        <Route
-          path="/artista/:id"
-          element={<PaginaArtista />}
-        />
-      </Routes>
+          {/* Rutas protegidas de administración */}
+          <Route path="/admin" element={<AdminRoute />}>
+            <Route element={<LayoutAdmin />}>
+              <Route index element={<Navigate to="artistas" replace />} />
+              <Route path="artistas" element={<AdminArtistas />} />
+              <Route path="canciones" element={<h1>Gestión de Canciones</h1>} />
+              <Route path="playlists" element={<h1>Gestión de Playlists</h1>} />
+              <Route path="planes" element={<AdminPlanes />} />
+              <Route path="usuarios" element={<h1>Gestión de Usuarios</h1>} />
+            </Route>
+          </Route>
 
-      <MusicPlayer />
-    </BrowserRouter>
+          {/* 404 */}
+          <Route path="*" element={<h1>404 - Página no encontrada</h1>} />
+        </Routes>
+      </PlayerProvider>
+    </AuthProvider>
   );
 }
-
-export default App;

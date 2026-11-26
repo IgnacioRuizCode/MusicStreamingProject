@@ -1,59 +1,133 @@
-
 :root {
-  --primary-color: #120A8F;
-  --primary-hover: #1e14b8;
-  --primary-active: #0a065c;
+  /* ====================
+     🎨 COLORES DE MARCA
+     ==================== */
+  --primary-color: #120A8F;         /* Azul base para botones Play, checks, toggles */
+  --primary-hover: #1e14b8;         /* Azul más claro para cuando pasas el mouse */
+  --primary-active: #0a065c;        /* Azul más oscuro para cuando haces click */
 
-  --bg-base: #121212;
-  --bg-surface: #181818;
-  --bg-elevated: #282828;
-  --bg-elevated-hover: #3E3E3E;
-  --bg-player: #000000;
+  /* ====================
+     🌑 FONDOS (DARK THEME)
+     ==================== */
+  --bg-base: #121212;               /* Fondo principal de la aplicación (el más oscuro) */
+  --bg-surface: #181818;            /* Fondo de la barra lateral (Sidebar) y cards base */
+  --bg-elevated: #282828;           /* Fondo de las cards cuando pasas el mouse (Hover) */
+  --bg-elevated-hover: #3E3E3E;     /* Fondo de elementos seleccionados o modales */
+  --bg-player: #000000;             /* Fondo del reproductor inferior y del Navbar al hacer scroll */
 
-  --text-primary: #FFFFFF;
-  --text-secondary: #A7A7A7;
-  --text-secondary-hover: #FFFFFF;
-  --text-muted: #727272;
-
-  --font-family: 'Inter', 'Circular Std', Helvetica, Arial, sans-serif;
-  --font-size-sm: 0.875rem;
-  --font-size-md: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.5rem;
-  --font-size-xxl: 2rem;
-
+  /* ====================
+     ✍️ TEXTOS E ICONOS
+     ==================== */
+  --text-primary: #FFFFFF;          /* Títulos principales, nombres de canciones (Resaltado) */
+  --text-secondary: #A7A7A7;        /* Nombres de artistas, subtítulos (Gris claro) */
+  --text-secondary-hover: #FFFFFF;  /* El gris debe volverse blanco al pasar el mouse */
+  --text-muted: #727272;            /* Textos menos importantes o fechas */
+  
+  /* ====================
+     🔤 TIPOGRAFÍA
+     ==================== */
+  --font-family: 'Inter', 'Plus Jakarta Sans', 'DM Sans', 'Rubik', Helvetica, Arial, sans-serif;
+  --font-size-sm: 0.875rem;         /* 14px - Letra chica, metadatos */
+  --font-size-md: 1rem;             /* 16px - Texto normal (p) */
+  --font-size-lg: 1.125rem;         /* 18px - Títulos de cards */
+  --font-size-xl: 1.5rem;           /* 24px - Títulos de secciones */
+  --font-size-xxl: 2rem;            /* 32px - Títulos principales de playlists */
+  
   --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --font-weight-black: 900;
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-pill: 500px;
-  --transition-base: 0.3s ease;
-}
+  --accent-blue: #2563eb;
+  --accent-blue-hover: #1d4ed8;
+  --accent-blue-active: #1e40af;
 
-* {
-  box-sizing: border-box;
-}
+  /* ====================
+     📐 BORDES Y EFECTOS
+     ==================== */
+  --radius-sm: 4px;                 /* Para portadas de álbumes dentro de cards */
+  --radius-md: 8px;                 /* Para las tarjetas (cards) completas */
+  --radius-pill: 500px;             /* Para los botones de Play o botones de login */
+  --transition-base: 0.3s ease;     /* Para que los hovers sean suaves */
 
-html {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
+  --navbar-height: 64px;
 }
 
 body {
-  width: 100%;
-  min-width: 320px;
-  min-height: 100vh;
   margin: 0;
-  padding: 0;
+  min-height: 100vh;
   background: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
 }
 
-#root {
-  width: 100%;
-  min-height: 100vh;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--transition-base), color var(--transition-base);
+}
+
+.btn--sm {
+  padding: 10px 22px;
+  font-size: var(--font-size-sm);
+}
+
+.btn--md {
+  padding: 12px 28px;
+  font-size: var(--font-size-md);
+}
+
+.btn--primary {
+  background: var(--accent-blue);
+  color: var(--text-primary);
+}
+
+.btn--primary:hover {
+  background: var(--accent-blue-hover);
+}
+
+.btn--primary:active {
+  background: var(--accent-blue-active);
+}
+
+.btn--secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.btn--secondary:hover {
+  background: var(--bg-elevated-hover);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.22);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.38);
 }

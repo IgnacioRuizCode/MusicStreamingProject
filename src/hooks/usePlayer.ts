@@ -1,15 +1,5 @@
-
-import { useContext } from 'react';
-import { PlayerContext } from '../context/playerContext';
+import { usePlayerContext } from '../context/PlayerContext';
 
 export function usePlayer() {
-  const context = useContext(PlayerContext);
-
-  if (!context) {
-    throw new Error(
-      'usePlayer debe utilizarse dentro de un PlayerProvider'
-    );
-  }
-
-  return context;
+  return usePlayerContext();
 }
