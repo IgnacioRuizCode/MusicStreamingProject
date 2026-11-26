@@ -9,7 +9,7 @@ import {
  type User,
  type Role,
 } from '../types/types';
-import { SEED_DATA } from '../seed';
+import { SEED_DATA } from '../data/seed';
 
 
 

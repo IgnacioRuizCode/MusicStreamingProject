@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
+import { RouteFallback } from '../components/RouteFallback';
 
 export function LayoutAuth() {
   return (
@@ -17,7 +19,9 @@ export function LayoutAuth() {
       <div style={{ marginBottom: '1.5rem', fontWeight: 700, fontSize: '1.5rem' }}>
         LOGO
       </div>
-      <Outlet />
+      <Suspense fallback={<RouteFallback />}>
+        <Outlet />
+      </Suspense>
     </div>
   );
 }

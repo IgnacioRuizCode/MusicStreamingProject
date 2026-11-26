@@ -1,12 +1,15 @@
+import { Suspense } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
+import { RouteFallback } from '../components/RouteFallback';
 import './AdminLayout.css';
 
 const ADMIN_LINKS = [
-  { to: '/admin/artistas', label: 'Artists' },
-  { to: '/admin/canciones', label: 'Songs' },
-  { to: '/admin/playlists', label: 'Playlists' },
-  { to: '/admin/planes', label: 'Plans' },
-  { to: '/admin/usuarios', label: 'Users' },
+  { to: '/admin', label: 'Dashboard', end: true },
+  { to: '/admin/artistas', label: 'Artists', end: false },
+  { to: '/admin/canciones', label: 'Songs', end: false },
+  { to: '/admin/playlists', label: 'Playlists', end: false },
+  { to: '/admin/planes', label: 'Plans', end: false },
+  { to: '/admin/usuarios', label: 'Users', end: false },
 ];
 
 export function LayoutAdmin() {
@@ -25,6 +28,7 @@ export function LayoutAdmin() {
             <NavLink
               key={item.to}
               to={item.to}
+              end={item.end}
               className={({ isActive }) =>
                 isActive ? 'admin-nav-link active' : 'admin-nav-link'
               }
@@ -36,7 +40,9 @@ export function LayoutAdmin() {
       </aside>
 
       <main className="admin-content">
-        <Outlet />
+        <Suspense fallback={<RouteFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );

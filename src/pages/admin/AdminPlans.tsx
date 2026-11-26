@@ -13,11 +13,11 @@ import {
   deletePlanSafe,
   countUsersByPlan,
 } from '../../services/storageServices';
-import './AdminPlan.css';
+import './AdminPlans.css';
 
 const FILAS_POR_PAGINA = 10;
 
-export function AdminPlanes() {
+export function AdminPlans() {
   const [planes, setPlanes] = useState<Plan[]>(() => getAll('plans'));
   const [busqueda, setBusqueda] = useState('');
   const [pagina, setPagina] = useState(1);

@@ -1,6 +1,6 @@
-
-import { useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { memo, useCallback, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Play } from 'lucide-react';
 
 import {
   getById,
@@ -26,52 +26,96 @@ function formatearOyentes(cantidad: number): string {
   return new Intl.NumberFormat('es-AR').format(cantidad);
 }
 
-function PaginaArtista() {
+interface ArtistSongRowProps {
+  song: Song;
+  index: number;
+  onPlay: (song: Song) => void;
+}
+
+const ArtistSongRow = memo(function ArtistSongRow({
+  song,
+  index,
+  onPlay,
+}: ArtistSongRowProps) {
+  return (
+    <button
+      className="artist-song-row"
+      onClick={() => onPlay(song)}
+    >
+      <span className="artist-song-number">{index + 1}</span>
+
+      <img
+        className="artist-song-cover"
+        src={song.cover}
+        alt={`Portada de ${song.title}`}
+        loading="lazy"
+        decoding="async"
+      />
+
+      <span className="artist-song-title">{song.title}</span>
+
+      <span className="artist-song-duration">
+        {formatearDuracion(song.duration)}
+      </span>
+    </button>
+  );
+});
+
+export function PaginaArtista() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const { playSong } = usePlayer();
   const { user, loading } = useAuth();
 
-  const [mostrarTodas, setMostrarTodas] = useState(false);
-  const [siguiendo, setSiguiendo] = useState<boolean | null>(null);
+  const [mostrarTodasKey, setMostrarTodasKey] = useState<string | null>(null);
+  const [followOverride, setFollowOverride] = useState<{
+    key: string;
+    value: boolean;
+  } | null>(null);
 
-  const artista: Artist | undefined = id
-    ? getById('artists', id)
-    : undefined;
+  const artista = useMemo<Artist | undefined>(
+    () => (id ? getById('artists', id) : undefined),
+    [id],
+  );
 
-  if (!artista) {
-    return (
-      <main className="artist-not-found">
-        <h1>Artista no encontrado</h1>
-        <Link to="/">Volver al inicio</Link>
-      </main>
-    );
-  }
+  const canciones = useMemo<Song[]>(
+    () => (artista ? getArtistSongs(artista.id) : []),
+    [artista],
+  );
 
-  const canciones: Song[] = getArtistSongs(artista.id);
+  const mostrarTodas = Boolean(artista && mostrarTodasKey === artista.id);
+  const cancionesPopulares = useMemo(
+    () => (mostrarTodas ? canciones : canciones.slice(0, 5)),
+    [canciones, mostrarTodas],
+  );
 
-  const cancionesPopulares = mostrarTodas
-    ? canciones.slice(0, 10)
-    : canciones.slice(0, 5);
+  const seguidoEnStorage = useMemo(() => {
+    if (!user || !artista) return false;
+    const storedUser = getById('users', user.id);
+    return storedUser?.followedArtists.includes(artista.id) ?? false;
+  }, [artista, user]);
 
+  const followKey = `${user?.id ?? 'guest'}:${artista?.id ?? 'none'}`;
   const estaSiguiendo =
-    siguiendo !== null
-      ? siguiendo
-      : user?.followedArtists.includes(artista.id) ?? false;
+    followOverride?.key === followKey ? followOverride.value : seguidoEnStorage;
 
-  const reproducirArtista = () => {
-    if (canciones.length > 0) {
-      playSong(canciones[0], canciones);
+  const reproducirCancion = useCallback(
+    (cancion: Song) => {
+      playSong(cancion, canciones);
+    },
+    [canciones, playSong],
+  );
+
+  const reproducirArtista = useCallback(() => {
+    const primeraCancion = canciones[0];
+    if (primeraCancion) {
+      playSong(primeraCancion, canciones);
     }
-  };
+  }, [canciones, playSong]);
 
-  const reproducirCancion = (cancion: Song) => {
-    playSong(cancion, canciones);
-  };
-
-  const cambiarSeguimiento = () => {
-    if (loading) return;
+  const cambiarSeguimiento = useCallback(() => {
+    if (loading || !artista) return;
 
     if (!user) {
       navigate('/login');
@@ -93,9 +137,18 @@ function PaginaArtista() {
     });
 
     if (actualizado) {
-      setSiguiendo(!estaSiguiendo);
+      setFollowOverride({ key: followKey, value: !estaSiguiendo });
     }
-  };
+  }, [artista, estaSiguiendo, followKey, loading, navigate, user]);
+
+  if (!artista) {
+    return (
+      <main className="artist-not-found">
+        <h1>Artista no encontrado</h1>
+        <Link to="/">Volver al inicio</Link>
+      </main>
+    );
+  }
 
   return (
     <main className="artist-page">
@@ -123,7 +176,7 @@ function PaginaArtista() {
           disabled={canciones.length === 0}
           aria-label="Reproducir canciones del artista"
         >
-          ▶
+          <Play size={24} fill="currentColor" />
         </button>
 
         <button
@@ -131,6 +184,8 @@ function PaginaArtista() {
             estaSiguiendo ? 'following' : ''
           }`}
           onClick={cambiarSeguimiento}
+          disabled={loading}
+          aria-pressed={estaSiguiendo}
         >
           {estaSiguiendo ? 'Siguiendo' : 'Seguir'}
         </button>
@@ -146,29 +201,12 @@ function PaginaArtista() {
         ) : (
           <div className="artist-songs-list">
             {cancionesPopulares.map((cancion, index) => (
-              <button
-                className="artist-song-row"
+              <ArtistSongRow
                 key={cancion.id}
-                onClick={() => reproducirCancion(cancion)}
-              >
-                <span className="artist-song-number">
-                  {index + 1}
-                </span>
-
-                <img
-                  className="artist-song-cover"
-                  src={cancion.cover}
-                  alt={`Portada de ${cancion.title}`}
-                />
-
-                <span className="artist-song-title">
-                  {cancion.title}
-                </span>
-
-                <span className="artist-song-duration">
-                  {formatearDuracion(cancion.duration)}
-                </span>
-              </button>
+                song={cancion}
+                index={index}
+                onPlay={reproducirCancion}
+              />
             ))}
           </div>
         )}
@@ -176,7 +214,9 @@ function PaginaArtista() {
         {canciones.length > 5 && (
           <button
             className="artist-show-more"
-            onClick={() => setMostrarTodas(!mostrarTodas)}
+            onClick={() =>
+              setMostrarTodasKey((prev) => (prev === artista.id ? null : artista.id))
+            }
           >
             {mostrarTodas ? 'Ver menos' : 'Ver más'}
           </button>
@@ -193,5 +233,3 @@ function PaginaArtista() {
     </main>
   );
 }
-
-export default PaginaArtista;

@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Navbar } from '../componets/navbar/navbar';
+import { Navbar } from '../components/navbar/navbar';
 import { Sidebar } from '../components/Sidebar/Sidebar';
 import { Player } from '../components/player/Player';
+import { RouteFallback } from '../components/RouteFallback';
 import { usePlayerContext } from '../context/PlayerContext';
 import './MainLayout.css';
 
@@ -44,7 +45,9 @@ export function MainLayout() {
 
       <main className="layout-content" ref={contentRef}>
         <div className="layout-page">
-          <Outlet />
+          <Suspense fallback={<RouteFallback />}>
+            <Outlet />
+          </Suspense>
         </div>
         <footer className="layout-footer">
           {/* Placeholder: reemplazar por <Footer /> */}
@@ -52,13 +55,11 @@ export function MainLayout() {
         </footer>
       </main>
 
-      <div className="layout-player">
-        <div
-  className="layout-player"
-  style={isPlayerFloating ? { height: 0, minHeight: 0, padding: 0, border: 'none' } : undefined}
->
-  <Player />
-</div>
+      <div
+        className="layout-player"
+        style={isPlayerFloating ? { height: 0, minHeight: 0, padding: 0, border: 'none' } : undefined}
+      >
+        <Player />
       </div>
 
       <nav className="layout-bottom-nav">

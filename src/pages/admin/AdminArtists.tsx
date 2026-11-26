@@ -17,7 +17,7 @@ import {
 
 const FILAS_POR_PAGINA = 10;
 
-export function AdminArtistas() {
+export function AdminArtists() {
   const [artistas, setArtistas] = useState<Artist[]>(() => getAll('artists'));
   const [busqueda, setBusqueda] = useState('');
   const [pagina, setPagina] = useState(1);
