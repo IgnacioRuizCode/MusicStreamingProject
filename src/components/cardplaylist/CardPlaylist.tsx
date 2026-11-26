@@ -49,6 +49,7 @@ export function CardPlaylist({
           alt={title}
           className="playlist-card__image"
           loading="lazy"
+          decoding="async"
           onError={handleImageError}
         />
 

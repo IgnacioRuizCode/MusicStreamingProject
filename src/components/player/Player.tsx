@@ -1,4 +1,12 @@
-import { useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+} from 'react';
 import {
   GripHorizontal,
   Heart,
@@ -19,9 +27,12 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
-import { usePlayerContext } from '../../context/PlayerContext';
+import {
+  usePlayerContext,
+  type PlayableSong,
+} from '../../context/PlayerContext';
 import { useDominantColor } from '../../hooks/useDominantColor';
-import { getById } from '../../services/storageServices';
+import { getAll } from '../../services/storageServices';
 import { Link } from 'react-router-dom';
 import './Player.css';
 
@@ -32,13 +43,110 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+interface PlayerProgressProps {
+  audioElement: HTMLAudioElement | null;
+  currentSong: PlayableSong | null;
+  isPlaying: boolean;
+  next: () => void;
+  onSeek: (seconds: number) => void;
+}
+
+function PlayerProgress({
+  audioElement,
+  currentSong,
+  isPlaying,
+  next,
+  onSeek,
+}: PlayerProgressProps) {
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(currentSong?.duration || 0);
+  const hasAudioSrc = Boolean(currentSong?.audioUrl ?? currentSong?.url);
+
+  useEffect(() => {
+    if (!audioElement) return;
+
+    const handleTimeUpdate = () => {
+      setProgress(audioElement.currentTime || 0);
+    };
+
+    const handleDurationChange = () => {
+      if (Number.isFinite(audioElement.duration) && audioElement.duration > 0) {
+        setDuration(audioElement.duration);
+      }
+    };
+
+    const handleEnded = () => setProgress(0);
+
+    audioElement.addEventListener('timeupdate', handleTimeUpdate);
+    audioElement.addEventListener('loadedmetadata', handleDurationChange);
+    audioElement.addEventListener('durationchange', handleDurationChange);
+    audioElement.addEventListener('ended', handleEnded);
+
+    handleTimeUpdate();
+    handleDurationChange();
+
+    return () => {
+      audioElement.removeEventListener('timeupdate', handleTimeUpdate);
+      audioElement.removeEventListener('loadedmetadata', handleDurationChange);
+      audioElement.removeEventListener('durationchange', handleDurationChange);
+      audioElement.removeEventListener('ended', handleEnded);
+    };
+  }, [audioElement]);
+
+  useEffect(() => {
+    if (!isPlaying || !currentSong || hasAudioSrc) return;
+
+    const limit = currentSong.duration || 180;
+    const timer = window.setInterval(() => {
+      setProgress((prev) => {
+        if (prev + 1 >= limit) {
+          next();
+          return 0;
+        }
+        return prev + 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [currentSong, hasAudioSrc, isPlaying, next]);
+
+  const totalDuration = duration || currentSong?.duration || 0;
+  const progressPercent =
+    totalDuration > 0 ? Math.min((progress / totalDuration) * 100, 100) : 0;
+
+  const handleSeek = (value: number) => {
+    const limit = totalDuration || 0;
+    const clamped = Math.min(Math.max(0, value), limit);
+    setProgress(clamped);
+    onSeek(clamped);
+  };
+
+  return (
+    <div className="player__progress-row">
+      <span className="player__time">{formatTime(progress)}</span>
+      <input
+        type="range"
+        min={0}
+        max={totalDuration || 100}
+        step={0.1}
+        value={Math.min(progress, totalDuration || 100)}
+        disabled={!currentSong}
+        onChange={(event) => handleSeek(Number(event.target.value))}
+        aria-label="Progreso de la canción"
+        className="player__range"
+        style={{ '--range-progress': `${progressPercent}%` } as CSSProperties}
+      />
+      <span className="player__time">{formatTime(totalDuration)}</span>
+    </div>
+  );
+}
+
 export function Player() {
   const {
     currentSong,
     queue,
     isPlaying,
-    progress,
-    duration,
+    audioElement,
     volume,
     isMuted,
     isFloating,
@@ -107,17 +215,23 @@ export function Player() {
     }
   };
 
-  const resolveArtistName = (artistId?: string) => {
-    if (!artistId) return 'Seleccioná una canción';
-    return getById('artists', artistId)?.name ?? artistId;
-  };
+  const artistNameById = useMemo(
+    () => new Map(getAll('artists').map((artist) => [artist.id, artist.name] as const)),
+    [],
+  );
 
-  const totalDuration = duration || currentSong?.duration || 0;
-  const progressPercent = totalDuration > 0 ? Math.min((progress / totalDuration) * 100, 100) : 0;
+  const resolveArtistName = useCallback(
+    (artistId?: string) => {
+      if (!artistId) return 'Seleccioná una canción';
+      return artistNameById.get(artistId) ?? artistId;
+    },
+    [artistNameById],
+  );
+
   const volumePercent = (isMuted ? 0 : volume) * 100;
   const artistName = resolveArtistName(currentSong?.artistId);
   const artistExists = currentSong?.artistId
-    ? Boolean(getById('artists', currentSong.artistId))
+    ? artistNameById.has(currentSong.artistId)
     : false;
   const isLiked = currentSong ? Boolean(likedIds[currentSong.id]) : false;
 
@@ -165,6 +279,8 @@ export function Player() {
                       src={track.cover}
                       alt={track.title}
                       className="player-queue__cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="player-queue__meta">
                       <strong>{track.title}</strong>
@@ -351,22 +467,14 @@ export function Player() {
             </button>
           </div>
 
-          <div className="player__progress-row">
-            <span className="player__time">{formatTime(progress)}</span>
-            <input
-              type="range"
-              min={0}
-              max={totalDuration || 100}
-              step={0.1}
-              value={Math.min(progress, totalDuration || 100)}
-              disabled={!currentSong}
-              onChange={(e) => seek(Number(e.target.value))}
-              aria-label="Progreso de la canción"
-              className="player__range"
-              style={{ '--range-progress': `${progressPercent}%` } as CSSProperties}
-            />
-            <span className="player__time">{formatTime(totalDuration)}</span>
-          </div>
+          <PlayerProgress
+            key={currentSong?.id ?? 'empty'}
+            audioElement={audioElement}
+            currentSong={currentSong}
+            isPlaying={isPlaying}
+            next={next}
+            onSeek={seek}
+          />
         </div>
 
         <div className="player__right">

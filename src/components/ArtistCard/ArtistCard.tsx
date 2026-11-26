@@ -50,6 +50,7 @@ export function ArtistCard({
             alt={name}
             className="artist-card__image"
             loading="lazy"
+            decoding="async"
             onError={handleImageError}
           />
         </div>
