@@ -17,7 +17,6 @@ import type {
   User,
 } from '../types/types';
 
-// Esquema mínimo para validar que la sesión guardada tiene un id válido
 const storedSessionSchema = z.object({
   id: z.string().min(1),
 });

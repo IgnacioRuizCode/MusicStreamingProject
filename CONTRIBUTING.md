@@ -1,3 +1,6 @@
+Admin: admin@streaming.com / Admin123!
+User demo: demo@streaming.com / User123!
+
 :root {
   /* ====================
      🎨 COLORES DE MARCA
