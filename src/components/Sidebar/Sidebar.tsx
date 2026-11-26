@@ -1,84 +1,85 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
-import { Home, LibraryBig, Plus, Search } from 'lucide-react'
-import { useAuth } from '../../hooks/useAuth'
+import { useEffect, useMemo, useState } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Home, LibraryBig, Plus, Search } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 import {
   getAll,
   getById,
-  getUserPlaylists,
   initializeData,
-} from '../../services/storageServices'
-import { LibraryItem } from './LibraryItem'
-import './Sidebar.css'
+} from '../../services/storageServices';
+import { LibraryItem } from './LibraryItem';
+import './Sidebar.css';
 
-type LibraryFilter = 'playlists' | 'artists'
+type LibraryFilter = 'playlists' | 'artists';
 
 interface SidebarItem {
-  id: string
-  name: string
-  image: string
-  type: string
-  path: string
+  id: string;
+  name: string;
+  image: string;
+  type: string;
+  path: string;
 }
 
 const filters: { id: LibraryFilter; label: string }[] = [
   { id: 'playlists', label: 'Playlists' },
   { id: 'artists', label: 'Artistas' },
-]
+];
 
 function formatListeners(value: number): string {
   if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
+    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
   }
   if (value >= 1_000) {
-    return `${Math.round(value / 1_000)}K`
+    return `${Math.round(value / 1_000)}K`;
   }
-  return String(value)
+  return String(value);
 }
 
 export function Sidebar() {
-  const { user } = useAuth()
-  const { pathname } = useLocation()
-  const [filter, setFilter] = useState<LibraryFilter>('playlists')
-  const [storageVersion, setStorageVersion] = useState(0)
+  const { user } = useAuth();
+  const { pathname } = useLocation();
+  const [filter, setFilter] = useState<LibraryFilter>('playlists');
+  const [storageVersion, setStorageVersion] = useState(0);
 
   useEffect(() => {
-    initializeData()
-    const handleStorage = () => setStorageVersion((value) => value + 1)
-    window.addEventListener('storage', handleStorage)
-    return () => window.removeEventListener('storage', handleStorage)
-  }, [])
+    initializeData();
+    const handleStorage = () => setStorageVersion((value) => value + 1);
+    window.addEventListener('storage', handleStorage);
+    // Refresca una vez tras hidratar portadas de iTunes
+    const timer = window.setTimeout(handleStorage, 1500);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.clearTimeout(timer);
+    };
+  }, []);
 
   const items = useMemo<SidebarItem[]>(() => {
-    void storageVersion
-    if (!user) return []
+    void storageVersion;
+    if (!user) return [];
 
     if (filter === 'playlists') {
-      return getUserPlaylists(user.id).map((playlist) => {
-        const creator = getById('users', playlist.creatorId)
+      return getAll('playlists').map((playlist) => {
+        const creator = getById('users', playlist.creatorId);
         return {
           id: playlist.id,
           name: playlist.title,
           image: playlist.cover,
-          type: `Playlist • ${creator?.username ?? 'Web Streaming Music'}`,
+          type: `Playlist • ${creator?.username ?? 'Spotify'}`,
           path: `/playlist/${playlist.id}`,
-        }
-      })
+        };
+      });
     }
 
-    const followedIds = getById('users', user.id)?.followedArtists ?? []
-    return getAll('artists')
-      .filter((artist) => followedIds.includes(artist.id))
-      .map((artist) => ({
-        id: artist.id,
-        name: artist.name,
-        image: artist.image,
-        type: `Artista • ${formatListeners(artist.monthlyListeners)} oyentes`,
-        path: `/artista/${artist.id}`,
-      }))
-  }, [filter, storageVersion, user])
+    return getAll('artists').map((artist) => ({
+      id: artist.id,
+      name: artist.name,
+      image: artist.image,
+      type: `Artista • ${formatListeners(artist.monthlyListeners)} oyentes`,
+      path: `/artista/${artist.id}`,
+    }));
+  }, [filter, storageVersion, user]);
 
-  const isSearchActive = pathname === '/search' || pathname.startsWith('/busqueda')
+  const isSearchActive = pathname === '/search' || pathname.startsWith('/busqueda');
 
   return (
     <div className="sidebar">
@@ -92,7 +93,7 @@ export function Sidebar() {
           <span className="sidebar__label">Inicio</span>
         </NavLink>
         <NavLink
-          to="/busqueda"
+          to="/search"
           className={() => `sidebar__nav-link${isSearchActive ? ' is-active' : ''}`}
         >
           <Search size={22} aria-hidden="true" />
@@ -152,18 +153,8 @@ export function Sidebar() {
             <p>
               {filter === 'playlists'
                 ? 'Todavía no tenés playlists.'
-                : 'Todavía no seguís artistas.'}
+                : 'Todavía no hay artistas disponibles.'}
             </p>
-            {filter === 'playlists' && (
-              <button
-                type="button"
-                className="sidebar__empty-action"
-                onClick={() => {}}
-              >
-                <Plus size={18} aria-hidden="true" />
-                Crear playlist
-              </button>
-            )}
           </div>
         ) : (
           <ul className="sidebar__list">
@@ -174,5 +165,5 @@ export function Sidebar() {
         )}
       </section>
     </div>
-  )
+  );
 }

@@ -51,11 +51,9 @@
 
 .layout-player {
   grid-area: player;
-  display: flex;
-  align-items: center;
-  min-height: 80px;
-  padding: 0 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  padding: 0;
+  z-index: 50;
 }
 
 .layout-player:empty {
@@ -114,8 +112,7 @@
   }
 
   .layout-player {
-    min-height: 56px;
-    padding: 0 1rem;
+    padding: 0;
   }
 
   .layout-bottom-nav {

@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, type FormEvent } from 'react';
 import { Home, Menu, Search } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Brand } from '../ui/Brand';
 import { IconButton } from '../ui/IconButton';
@@ -16,18 +16,35 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [query, setQuery] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const isSearchPage = pathname.startsWith('/search');
+  const query = isSearchPage ? (searchParams.get('q') ?? '') : '';
+
+  useEffect(() => {
+    if (isSearchPage) {
+      searchInputRef.current?.focus();
+    }
+  }, [isSearchPage]);
 
   const handleSearchChange = (value: string) => {
-    setQuery(value);
-    if (!pathname.startsWith('/search')) {
-      navigate('/search');
+    if (!isSearchPage) {
+      navigate(value ? `/search?q=${encodeURIComponent(value)}` : '/search');
+      return;
+    }
+
+    if (value) {
+      setSearchParams({ q: value }, { replace: true });
+    } else {
+      setSearchParams({}, { replace: true });
     }
   };
 
   const handleSearchSubmit = (event: FormEvent) => {
     event.preventDefault();
-    navigate('/search');
+    const trimmed = query.trim();
+    navigate(trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : '/search');
   };
 
   const isHome = pathname === '/';
@@ -44,7 +61,6 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
         </IconButton>
 
         <Brand />
-
       </div>
 
       <div className="navbar__center">
@@ -61,6 +77,7 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
         <form className="navbar__search-pill" onSubmit={handleSearchSubmit} role="search">
           <Search size={18} className="navbar__search-icon" aria-hidden="true" />
           <input
+            ref={searchInputRef}
             type="search"
             value={query}
             onChange={(e) => handleSearchChange(e.target.value)}

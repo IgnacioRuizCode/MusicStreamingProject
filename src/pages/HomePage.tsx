@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Pause, Play } from 'lucide-react';
 import { usePlayerContext } from '../context/PlayerContext';
 import {
@@ -16,6 +17,7 @@ function formatDuration(seconds: number): string {
 }
 
 export function HomePage() {
+  const navigate = useNavigate();
   const songs = useMemo(() => getAll('songs'), []);
   const playlists = useMemo(() => getAll('playlists'), []);
   const artists = useMemo(() => getAll('artists'), []);
@@ -82,7 +84,7 @@ export function HomePage() {
               <article
                 key={playlist.id}
                 className="home-card"
-                onClick={() => handlePlayPlaylist(playlist)}
+                onClick={() => navigate(`/playlist/${playlist.id}`)}
               >
                 <div className="home-card__media-wrap">
                   <div className="home-card__media">
@@ -97,6 +99,10 @@ export function HomePage() {
                     className={`home-card__play-btn ${
                       isActivePlaylist ? 'home-card__play-btn--active' : ''
                     }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePlayPlaylist(playlist);
+                    }}
                     aria-label={
                       isActivePlaylist
                         ? `Pausar ${playlist.title}`
