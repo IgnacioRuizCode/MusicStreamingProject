@@ -11,6 +11,7 @@ import { AdminPlanes } from './components/admin/AdminPlan';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { HomePage } from './pages/HomePage';
+import PaginaPlaylist from './pages/PaginaPlaylist';
 import './App.css';
 
 export default function App() {
@@ -29,7 +30,7 @@ export default function App() {
             <Route path="/perfil" element={<h1>Perfil</h1>} />
             <Route path="/ayuda" element={<h1>Ayuda</h1>} />
             <Route path="/artista/:id" element={<h1>Artista</h1>} />
-            <Route path="/playlist/:id" element={<h1>Playlist</h1>} />
+            <Route path="/playlist/:id" element={<PaginaPlaylist />} />
           </Route>
 
           {/* Rutas de autenticación */}
