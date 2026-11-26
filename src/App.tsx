@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -16,6 +17,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { HomePage } from './pages/HomePage';
 import { SearchPage } from './pages/SearchPage';
 import PaginaPlaylist from './pages/PaginaPlaylist';
+import PaginaArtista from './.pages/PaginaArtista';
 import './App.css';
 
 export default function App() {
@@ -29,7 +31,7 @@ export default function App() {
       <PlayerProvider>
         <Toaster position="bottom-right" richColors theme="dark" />
         <Routes>
-          {/* Rutas principales con Navbar, Sidebar y Player */}
+          {/* Rutas principales */}
           <Route path="/" element={<MainLayout />}>
             <Route index element={<HomePage />} />
             <Route path="search" element={<SearchPage />} />
@@ -38,7 +40,7 @@ export default function App() {
             <Route path="planes" element={<h1>Planes</h1>} />
             <Route path="perfil" element={<h1>Perfil</h1>} />
             <Route path="ayuda" element={<h1>Ayuda</h1>} />
-            <Route path="artista/:id" element={<h1>Artista</h1>} />
+            <Route path="artista/:id" element={<PaginaArtista />} />
             <Route path="playlist/:id" element={<PaginaPlaylist />} />
           </Route>
 
