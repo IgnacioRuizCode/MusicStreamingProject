@@ -1,16 +1,15 @@
+
 import { STORAGE_KEYS, type StorageKey } from './storageKeys';
 import {
- type Artist,
- type CollectionMap,
- type CollectionName,
- type Playlist,
- type SessionUser,
- type Song,
- type User,
+  type Artist,
+  type CollectionMap,
+  type CollectionName,
+  type Playlist,
+  type SessionUser,
+  type Song,
+  type User,
 } from '../types/types';
 import { SEED_DATA } from '../seed';
-
-
 
 export function read<T>(key: StorageKey, defaultValue: T): T {
   try {
@@ -43,7 +42,6 @@ export function remove(key: StorageKey): void {
   }
 }
 
-
 export function initializeData(): void {
   const collections: CollectionName[] = [
     'users',
@@ -61,6 +59,41 @@ export function initializeData(): void {
       save(key, SEED_DATA[col]);
     } else {
       read(key, SEED_DATA[col]);
+
+      if (col === 'songs') {
+        const storedSongs = read<Song[]>(key, SEED_DATA.songs);
+
+        const audioSongIds = [
+          'song-1',
+          'song-2',
+          'song-3',
+          'song-4',
+          'song-5',
+          'song-13',
+          'song-17',
+          'song-29',
+        ];
+
+        const updatedSongs = storedSongs.map((song) => {
+          if (!audioSongIds.includes(song.id)) {
+            return song;
+          }
+
+          const seedSong = SEED_DATA.songs.find(
+            (seed) => seed.id === song.id
+          );
+
+          if (!seedSong) return song;
+
+          return {
+            ...song,
+            title: seedSong.title,
+            url: seedSong.url,
+          };
+        });
+
+        save(key, updatedSongs);
+      }
     }
   });
 }
@@ -70,7 +103,6 @@ export function resetData(): void {
   initializeData();
   console.info('[Storage] Data reset to initial seed.');
 }
-
 
 export function getAll<K extends CollectionName>(
   collection: K
@@ -132,7 +164,6 @@ export function deleteById<K extends CollectionName>(
   return true;
 }
 
-
 export function getSession(): SessionUser | null {
   return read<SessionUser | null>(STORAGE_KEYS.session, null);
 }
@@ -146,7 +177,6 @@ export function saveSession(user: User | SessionUser): void {
 export function clearSession(): void {
   remove(STORAGE_KEYS.session);
 }
-
 
 export function getUserByEmail(email: string): User | undefined {
   const users = getAll('users');
@@ -192,9 +222,11 @@ export function search(term: string): {
   const songs = getAll('songs').filter((s) =>
     s.title.toLowerCase().includes(query)
   );
+
   const artists = getAll('artists').filter((a) =>
     a.name.toLowerCase().includes(query)
   );
+
   const playlists = getAll('playlists').filter(
     (p) =>
       p.title.toLowerCase().includes(query) ||
