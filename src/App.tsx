@@ -1,7 +1,10 @@
+import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
 import { PlayerProvider } from './context/PlayerContext';
+import { initializeData } from './services/storageServices';
+import { hydrateCatalogWithRealMedia } from './services/musicApiService';
 import { MainLayout } from './layouts/MainLayout';
 import { LayoutAuth } from './layouts/LayoutAuth';
 import { LayoutAdmin } from './layouts/AdminLayout';
@@ -11,26 +14,32 @@ import { AdminPlanes } from './components/admin/AdminPlan';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { HomePage } from './pages/HomePage';
+import { SearchPage } from './pages/SearchPage';
 import PaginaPlaylist from './pages/PaginaPlaylist';
 import './App.css';
 
 export default function App() {
+  useEffect(() => {
+    initializeData();
+    hydrateCatalogWithRealMedia();
+  }, []);
+
   return (
     <AuthProvider>
       <PlayerProvider>
         <Toaster position="bottom-right" richColors theme="dark" />
         <Routes>
           {/* Rutas principales con Navbar, Sidebar y Player */}
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/search" element={<h1>Buscar</h1>} />
-            <Route path="/busqueda" element={<Navigate to="/search" replace />} />
-            <Route path="/library" element={<h1>Biblioteca</h1>} />
-            <Route path="/planes" element={<h1>Planes</h1>} />
-            <Route path="/perfil" element={<h1>Perfil</h1>} />
-            <Route path="/ayuda" element={<h1>Ayuda</h1>} />
-            <Route path="/artista/:id" element={<h1>Artista</h1>} />
-            <Route path="/playlist/:id" element={<PaginaPlaylist />} />
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="search" element={<SearchPage />} />
+            <Route path="busqueda" element={<Navigate to="/search" replace />} />
+            <Route path="library" element={<h1>Biblioteca</h1>} />
+            <Route path="planes" element={<h1>Planes</h1>} />
+            <Route path="perfil" element={<h1>Perfil</h1>} />
+            <Route path="ayuda" element={<h1>Ayuda</h1>} />
+            <Route path="artista/:id" element={<h1>Artista</h1>} />
+            <Route path="playlist/:id" element={<PaginaPlaylist />} />
           </Route>
 
           {/* Rutas de autenticación */}
@@ -41,8 +50,8 @@ export default function App() {
           </Route>
 
           {/* Rutas protegidas de administración */}
-          <Route element={<AdminRoute />}>
-            <Route path="/admin" element={<LayoutAdmin />}>
+          <Route path="/admin" element={<AdminRoute />}>
+            <Route element={<LayoutAdmin />}>
               <Route index element={<Navigate to="artistas" replace />} />
               <Route path="artistas" element={<AdminArtistas />} />
               <Route path="canciones" element={<h1>Gestión de Canciones</h1>} />
