@@ -5,6 +5,7 @@ import { Sidebar } from '../components/Sidebar/Sidebar';
 import { Player } from '../components/player/Player';
 import { GuestBanner } from '../components/player/GuestBanner';
 import { RouteFallback } from '../components/RouteFallback';
+import { Footer } from '../components/footer/Footer';
 import { usePlayerContext } from '../context/PlayerContext';
 import { useAuth } from '../hooks/useAuth';
 import './MainLayout.css';
@@ -54,8 +55,7 @@ export function MainLayout() {
           </Suspense>
         </div>
         <footer className="layout-footer">
-          {/* Placeholder: reemplazar por <Footer /> */}
-          <p>Footer</p>
+          <Footer />
         </footer>
       </main>
 
