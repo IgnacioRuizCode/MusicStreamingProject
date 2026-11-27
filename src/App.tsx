@@ -6,6 +6,7 @@ import { MainLayout } from './layouts/MainLayout';
 import { LayoutAuth } from './layouts/LayoutAuth';
 import { LayoutAdmin } from './layouts/AdminLayout';
 import { HomePage } from './pages/HomePage';
+import { AboutPage } from './components/about-us/AboutPage';
 import { hydrateCatalogWithRealMedia } from './services/musicApiService';
 
 const SearchPage = lazy(() =>
@@ -68,6 +69,7 @@ export default function App() {
         <Route element={<MainLayout />}>
           <Route index element={<HomePage />} />
           <Route path="search" element={<SearchPage />} />
+          <Route path="/nosotros" element={<AboutPage />} />
           <Route path="busqueda" element={<Navigate to="/search" replace />} />
           <Route path="artista/:id" element={<PaginaArtista />} />
           <Route path="playlist/:id" element={<PaginaPlaylist />} />
