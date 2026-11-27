@@ -6,6 +6,7 @@ import {
   useState,
   type CSSProperties,
   type PointerEvent,
+  type TouchEvent,
 } from 'react';
 import {
   GripHorizontal,
@@ -167,6 +168,8 @@ export function Player() {
 
   const playerRef = useRef<HTMLElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
+  const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
+  const [swipeOffsetX, setSwipeOffsetX] = useState(0);
   const [customPos, setCustomPos] = useState<{ x: number; y: number } | null>(null);
   const [isQueueOpen, setIsQueueOpen] = useState(false);
   const [likedIds, setLikedIds] = useState<Record<string, boolean>>({});
@@ -215,6 +218,51 @@ export function Player() {
     }
   };
 
+  const handleTouchStart = (event: TouchEvent<HTMLElement>) => {
+    if (isFloating || !currentSong) return;
+    if ((event.target as Element).closest('button, input, a')) return;
+
+    const touch = event.touches[0];
+    swipeStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchMove = (event: TouchEvent<HTMLElement>) => {
+    if (!swipeStartRef.current) return;
+
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - swipeStartRef.current.x;
+    const deltaY = touch.clientY - swipeStartRef.current.y;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      const clamped = Math.max(-72, Math.min(72, deltaX * 0.65));
+      setSwipeOffsetX(clamped);
+    }
+  };
+
+  const handleTouchEnd = (event: TouchEvent<HTMLElement>) => {
+    if (!swipeStartRef.current) return;
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - swipeStartRef.current.x;
+    const deltaY = touch.clientY - swipeStartRef.current.y;
+
+    swipeStartRef.current = null;
+    setSwipeOffsetX(0);
+
+    if (Math.abs(deltaX) > 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+      if (deltaX < 0) {
+        next();
+      } else {
+        previous();
+      }
+    }
+  };
+
+  const handleTouchCancel = () => {
+    swipeStartRef.current = null;
+    setSwipeOffsetX(0);
+  };
+
   const artistNameById = useMemo(
     () => new Map(getAll('artists').map((artist) => [artist.id, artist.name] as const)),
     [],
@@ -242,6 +290,7 @@ export function Player() {
 
   const playerStyle: CSSProperties = {
     '--player-ambient': currentSong ? ambientColor : 'rgba(99, 102, 241, 0.16)',
+    '--swipe-x': `${swipeOffsetX}px`,
     ...(isFloating && position
       ? { left: `${position.x}px`, top: `${position.y}px` }
       : {}),
@@ -310,9 +359,13 @@ export function Player() {
 
       <section
         ref={playerRef}
-        className={`player${isFloating ? ' player--floating' : ''}${isPlaying ? ' is-playing' : ''}`}
+        className={`player${isFloating ? ' player--floating' : ''}${isPlaying ? ' is-playing' : ''}${swipeOffsetX !== 0 ? ' is-swiping' : ''}`}
         style={playerStyle}
         aria-label="Reproductor de música"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
       >
         {isFloating && (
           <div
@@ -411,7 +464,7 @@ export function Player() {
 
             <button
               type="button"
-              className="player__icon-btn player__skip-btn"
+              className="player__icon-btn player__skip-btn player__prev-btn"
               onClick={previous}
               disabled={!currentSong}
               aria-label="Canción anterior"
@@ -437,7 +490,7 @@ export function Player() {
 
             <button
               type="button"
-              className="player__icon-btn player__skip-btn"
+              className="player__icon-btn player__skip-btn player__next-btn"
               onClick={next}
               disabled={!currentSong}
               aria-label="Canción siguiente"

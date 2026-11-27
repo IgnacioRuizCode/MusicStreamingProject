@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { artistSchema, type Artist, type ArtistFormData } from '../../schemas/artistSchema';
+import { ImagePreview } from './ImagePreview';
+import './ArtistForm.css';
 
 interface FormularioArtistaProps {
   valoresIniciales?: Artist | null;
@@ -18,6 +20,7 @@ export function ArtistForm({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ArtistFormData>({
     resolver: zodResolver(artistSchema),
@@ -28,6 +31,9 @@ export function ArtistForm({
     },
   });
 
+  const nombre = watch('name');
+  const imagen = watch('image');
+
   useEffect(() => {
     reset({
       name: valoresIniciales?.name ?? '',
@@ -37,32 +43,70 @@ export function ArtistForm({
   }, [valoresIniciales, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onGuardar)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <div>
-        <label htmlFor="nombre">Nombre</label>
-        <input id="nombre" type="text" {...register('name')} style={{ width: '100%' }} />
-        {errors.name && <span style={{ color: '#f87171', fontSize: '0.85rem' }}>{errors.name.message}</span>}
+    <form onSubmit={handleSubmit(onGuardar)} className="admin-form">
+      <div className="admin-form__preview">
+        <ImagePreview src={imagen} alt={nombre || 'Artista'} redonda grande />
+        <div className="admin-form__preview-text">
+          <strong>{nombre || 'Nombre del artista'}</strong>
+          <span>La foto se actualiza al instante</span>
+        </div>
       </div>
 
-      <div>
-        <label htmlFor="image">Imagen (URL o ruta)</label>
-        <input id="image" type="text" {...register('image')} style={{ width: '100%' }} />
-        {errors.image && <span style={{ color: '#f87171', fontSize: '0.85rem' }}>{errors.image.message}</span>}
+      <div className="admin-form__grid">
+        <div className="admin-form__field admin-form__field--full">
+          <label className="admin-form__label" htmlFor="artista-nombre">
+            Nombre
+          </label>
+          <input
+            id="artista-nombre"
+            type="text"
+            className="admin-input"
+            placeholder="Ej. Daft Punk"
+            {...register('name')}
+          />
+          {errors.name && (
+            <span className="admin-form__error">{errors.name.message}</span>
+          )}
+        </div>
+
+        <div className="admin-form__field admin-form__field--full">
+          <label className="admin-form__label" htmlFor="artista-imagen">
+            Imagen
+          </label>
+          <input
+            id="artista-imagen"
+            type="text"
+            className="admin-input"
+            placeholder="https://... o /ruta-local.jpg"
+            {...register('image')}
+          />
+          {errors.image && (
+            <span className="admin-form__error">{errors.image.message}</span>
+          )}
+        </div>
+
+        <div className="admin-form__field">
+          <label className="admin-form__label" htmlFor="artista-oyentes">
+            Oyentes mensuales
+          </label>
+          <input
+            id="artista-oyentes"
+            type="number"
+            min="0"
+            className="admin-input"
+            {...register('monthlyListeners', { valueAsNumber: true })}
+          />
+          {errors.monthlyListeners && (
+            <span className="admin-form__error">{errors.monthlyListeners.message}</span>
+          )}
+        </div>
       </div>
 
-      <div>
-        <label htmlFor="monthlyListeners">Oyentes mensuales</label>
-        <input id="monthlyListeners" type="number" {...register('monthlyListeners', {valueAsNumber: true})} style={{ width: '100%' }} />
-        {errors.monthlyListeners && (
-          <span style={{ color: '#f87171', fontSize: '0.85rem' }}>{errors.monthlyListeners.message}</span>
-        )}
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
-        <button type="button" onClick={onCancelar}>
+      <div className="admin-form__actions">
+        <button type="button" className="btn btn--secondary" onClick={onCancelar}>
           Cancelar
         </button>
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" className="btn btn--primary" disabled={isSubmitting}>
           {valoresIniciales ? 'Guardar cambios' : 'Crear artista'}
         </button>
       </div>

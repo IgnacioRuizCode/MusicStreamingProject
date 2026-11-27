@@ -1,0 +1,104 @@
+.admin-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.74);
+  backdrop-filter: blur(6px);
+}
+
+.admin-modal__dialog {
+  width: 100%;
+  max-height: min(90dvh, 860px);
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background-color: rgba(22, 22, 30, 0.96);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
+  color: var(--text-primary, #ffffff);
+}
+
+.admin-modal__dialog--sm {
+  max-width: 420px;
+}
+
+.admin-modal__dialog--md {
+  max-width: 560px;
+}
+
+.admin-modal__dialog--lg {
+  max-width: 760px;
+}
+
+.admin-modal__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(22, 22, 30, 0.98);
+  backdrop-filter: blur(10px);
+}
+
+.admin-modal__title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.admin-modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary, #a7a7a7);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.admin-modal__close:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.admin-modal__close:active {
+  transform: scale(0.94);
+}
+
+.admin-modal__body {
+  padding: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .admin-modal__backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .admin-modal__dialog {
+    max-width: 100%;
+    max-height: 92dvh;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .admin-modal__header {
+    padding: 1rem 1.15rem;
+  }
+
+  .admin-modal__body {
+    padding: 1.15rem;
+  }
+}

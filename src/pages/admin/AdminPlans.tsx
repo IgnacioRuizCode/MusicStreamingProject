@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 import { AdminTab, type ColumnaTabla } from '../../components/admin/AdminTab';
 import { Paginacion } from '../../components/admin/Paginacion';
 import { ConfirmationModal } from '../../components/admin/ConfirmationModal';
+import { AdminModal } from '../../components/admin/AdminModal';
+import { AdminSearch } from '../../components/admin/AdminSearch';
 import { PlanForm } from '../../components/admin/PlanForm';
 import { useDebounce } from '../../hooks/useDebounce';
 import type { Plan } from '../../types/types';
@@ -13,7 +15,6 @@ import {
   deletePlanSafe,
   countUsersByPlan,
 } from '../../services/storageServices';
-import './AdminPlans.css';
 
 const FILAS_POR_PAGINA = 10;
 
@@ -21,7 +22,6 @@ export function AdminPlans() {
   const [planes, setPlanes] = useState<Plan[]>(() => getAll('plans'));
   const [busqueda, setBusqueda] = useState('');
   const [pagina, setPagina] = useState(1);
-
   const [modalFormAbierto, setModalFormAbierto] = useState(false);
   const [planEditando, setPlanEditando] = useState<Plan | null>(null);
   const [planAEliminar, setPlanAEliminar] = useState<Plan | null>(null);
@@ -31,7 +31,7 @@ export function AdminPlans() {
   const filtrados = useMemo(() => {
     const q = busquedaDebounced.trim().toLowerCase();
     if (!q) return planes;
-    return planes.filter((p) => p.nombre.toLowerCase().includes(q));
+    return planes.filter((plan) => plan.nombre.toLowerCase().includes(q));
   }, [planes, busquedaDebounced]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtrados.length / FILAS_POR_PAGINA));
@@ -53,6 +53,11 @@ export function AdminPlans() {
     setModalFormAbierto(true);
   };
 
+  const cerrarFormulario = () => {
+    setModalFormAbierto(false);
+    setPlanEditando(null);
+  };
+
   const handleGuardar = (data: Omit<Plan, 'id'>) => {
     try {
       if (planEditando) {
@@ -63,8 +68,7 @@ export function AdminPlans() {
         toast.success('Plan creado correctamente');
       }
       refrescar();
-      setModalFormAbierto(false);
-      setPlanEditando(null);
+      cerrarFormulario();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al guardar el plan');
     }
@@ -83,69 +87,117 @@ export function AdminPlans() {
     }
   };
 
+  const suscriptoresEliminar = planAEliminar
+    ? countUsersByPlan(planAEliminar.id)
+    : 0;
+
   const columnas: ColumnaTabla<Plan>[] = [
-    { key: 'nombre', header: 'Nombre', render: (p) => p.nombre },
+    {
+      key: 'nombre',
+      header: 'Nombre',
+      render: (plan) => (
+        <span className="admin-song-cell">
+          <span className="admin-song-cell__info">
+            <strong>{plan.nombre}</strong>
+            <span>{plan.destacado ? 'Plan destacado' : 'Plan estándar'}</span>
+          </span>
+        </span>
+      ),
+    },
     {
       key: 'precio',
       header: 'Precio',
-      render: (p) => (p.precio === 0 ? 'Gratis' : `$${p.precio.toLocaleString('es-AR')}`),
+      render: (plan) =>
+        plan.precio === 0 ? 'Gratis' : `$${plan.precio.toLocaleString('es-AR')}`,
     },
     {
       key: 'beneficios',
       header: 'Beneficios',
-      render: (p) => `${p.beneficios.length} beneficio(s)`,
+      render: (plan) => `${plan.beneficios.length} beneficio(s)`,
     },
     {
       key: 'destacado',
       header: 'Destacado',
-      render: (p) => (p.destacado ? 'Sí' : 'No'),
+      render: (plan) => (
+        <span
+          className={
+            plan.destacado ? 'admin-badge admin-badge--warning' : 'admin-badge'
+          }
+        >
+          {plan.destacado ? 'Sí' : 'No'}
+        </span>
+      ),
     },
     {
       key: 'subscribers',
       header: 'Suscriptores',
-      render: (p) => countUsersByPlan(p.id),
+      render: (plan) => (
+        <span className="admin-badge">{countUsersByPlan(plan.id)}</span>
+      ),
     },
   ];
 
   return (
-    <section>
-      <div className="admin-planes__header">
-        <h1 className="admin-planes__titulo">Planes</h1>
-        <div className="admin-planes__controles">
-          <input
-            type="search"
-            placeholder="Buscar plan..."
-            value={busqueda}
-            onChange={(e) => {
-              setBusqueda(e.target.value);
-              setPagina(1);
-            }}
-          />
-          <button type="button" onClick={abrirCrear}>
+    <section className="admin-page">
+      <header className="admin-page__header">
+        <div>
+          <h1 className="admin-page__title">Planes</h1>
+          <p className="admin-page__subtitle">
+            Definí precios, beneficios y planes destacados de la plataforma.
+          </p>
+        </div>
+        <div className="admin-page__actions">
+          <button type="button" className="btn btn--primary" onClick={abrirCrear}>
             + Nuevo plan
           </button>
         </div>
+      </header>
+
+      <div className="admin-toolbar">
+        <div className="admin-toolbar__group">
+          <AdminSearch
+            value={busqueda}
+            onChange={(value) => {
+              setBusqueda(value);
+              setPagina(1);
+            }}
+            placeholder="Buscar plan..."
+          />
+        </div>
+        <span className="admin-count">
+          {filtrados.length} de {planes.length} planes
+        </span>
       </div>
 
       <AdminTab
         columnas={columnas}
         datos={paginados}
         mensajeVacio={
-          busqueda ? 'No se encontraron planes con esa búsqueda.' : 'Todavía no hay planes cargados.'
+          busqueda
+            ? 'No se encontraron planes con esa búsqueda.'
+            : 'Todavía no hay planes cargados.'
         }
         accionVacio={
           !busqueda && (
-            <button type="button" onClick={abrirCrear}>
+            <button type="button" className="btn btn--primary" onClick={abrirCrear}>
               Crear primer plan
             </button>
           )
         }
         renderAcciones={(plan) => (
-          <div className="admin-planes__acciones-fila">
-            <button type="button" onClick={() => abrirEditar(plan)}>
+          <div className="admin-actions">
+            <button
+              type="button"
+              className="btn btn--secondary btn--sm"
+              onClick={() => abrirEditar(plan)}
+            >
               Editar
             </button>
-            <button type="button" onClick={() => setPlanAEliminar(plan)}>
+            <button
+              type="button"
+              className="btn btn--danger btn--sm"
+              onClick={() => setPlanAEliminar(plan)}
+            >
               Eliminar
             </button>
           </div>
@@ -159,27 +211,27 @@ export function AdminPlans() {
       />
 
       {modalFormAbierto && (
-        <div role="dialog" aria-modal="true" className="admin-planes__modal-overlay">
-          <div className="admin-planes__modal-contenido">
-            <h2 className="admin-planes__modal-titulo">
-              {planEditando ? 'Editar plan' : 'Nuevo plan'}
-            </h2>
-            <PlanForm
-              valoresIniciales={planEditando}
-              onGuardar={handleGuardar}
-              onCancelar={() => {
-                setModalFormAbierto(false);
-                setPlanEditando(null);
-              }}
-            />
-          </div>
-        </div>
+        <AdminModal
+          titulo={planEditando ? 'Editar plan' : 'Nuevo plan'}
+          onCerrar={cerrarFormulario}
+          tamano="md"
+        >
+          <PlanForm
+            valoresIniciales={planEditando}
+            onGuardar={handleGuardar}
+            onCancelar={cerrarFormulario}
+          />
+        </AdminModal>
       )}
 
       <ConfirmationModal
         abierto={Boolean(planAEliminar)}
         titulo="Eliminar plan"
-        mensaje={`¿Seguro que querés eliminar el plan "${planAEliminar?.nombre}"?`}
+        mensaje={
+          suscriptoresEliminar > 0
+            ? `No podés eliminar "${planAEliminar?.nombre}" porque tiene ${suscriptoresEliminar} usuario(s) suscripto(s).`
+            : `¿Seguro que querés eliminar el plan "${planAEliminar?.nombre}"? Esta acción no se puede deshacer.`
+        }
         onConfirmar={handleConfirmarEliminar}
         onCancelar={() => setPlanAEliminar(null)}
       />

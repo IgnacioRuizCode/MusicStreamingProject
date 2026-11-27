@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import './ConfirmationModal.css';
 
 interface ModalConfirmacionProps {
@@ -17,6 +18,17 @@ export function ConfirmationModal({
   onConfirmar,
   onCancelar,
 }: ModalConfirmacionProps) {
+  useEffect(() => {
+    if (!abierto) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onCancelar();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [abierto, onCancelar]);
+
   if (!abierto) return null;
 
   return (
@@ -28,7 +40,7 @@ export function ConfirmationModal({
     >
       <div
         className="confirm-modal__dialog"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
       >
         <h3 className="confirm-modal__title">{titulo}</h3>
         <p className="confirm-modal__message">{mensaje}</p>
