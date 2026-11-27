@@ -31,7 +31,7 @@ export function AdminPlans() {
   const filtrados = useMemo(() => {
     const q = busquedaDebounced.trim().toLowerCase();
     if (!q) return planes;
-    return planes.filter((p) => p.name.toLowerCase().includes(q));
+    return planes.filter((p) => p.nombre.toLowerCase().includes(q));
   }, [planes, busquedaDebounced]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtrados.length / FILAS_POR_PAGINA));
@@ -84,21 +84,21 @@ export function AdminPlans() {
   };
 
   const columnas: ColumnaTabla<Plan>[] = [
-    { key: 'name', header: 'Nombre', render: (p) => p.name },
+    { key: 'nombre', header: 'Nombre', render: (p) => p.nombre },
     {
-      key: 'price',
+      key: 'precio',
       header: 'Precio',
-      render: (p) => (p.price === 0 ? 'Gratis' : `$${p.price.toLocaleString('es-AR')}`),
+      render: (p) => (p.precio === 0 ? 'Gratis' : `$${p.precio.toLocaleString('es-AR')}`),
     },
     {
-      key: 'benefits',
+      key: 'beneficios',
       header: 'Beneficios',
-      render: (p) => `${p.benefits.length} beneficio(s)`,
+      render: (p) => `${p.beneficios.length} beneficio(s)`,
     },
     {
-      key: 'featured',
+      key: 'destacado',
       header: 'Destacado',
-      render: (p) => (p.featured ? 'Sí' : 'No'),
+      render: (p) => (p.destacado ? 'Sí' : 'No'),
     },
     {
       key: 'subscribers',
@@ -179,7 +179,7 @@ export function AdminPlans() {
       <ConfirmationModal
         abierto={Boolean(planAEliminar)}
         titulo="Eliminar plan"
-        mensaje={`¿Seguro que querés eliminar el plan "${planAEliminar?.name}"?`}
+        mensaje={`¿Seguro que querés eliminar el plan "${planAEliminar?.nombre}"?`}
         onConfirmar={handleConfirmarEliminar}
         onCancelar={() => setPlanAEliminar(null)}
       />

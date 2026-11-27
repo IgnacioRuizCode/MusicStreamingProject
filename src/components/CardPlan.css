@@ -1,0 +1,129 @@
+.card-plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: var(--bg-surface, #181818);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  transition: transform var(--transition-base, 0.3s ease),
+    border-color var(--transition-base, 0.3s ease),
+    background-color var(--transition-base, 0.3s ease);
+}
+
+.card-plan:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: var(--bg-elevated, #282828);
+}
+
+.card-plan--destacado {
+  border-color: var(--accent-blue, #2563eb);
+  box-shadow: 0 18px 44px rgba(37, 99, 235, 0.22);
+}
+
+.card-plan--actual {
+  border-color: rgba(74, 222, 128, 0.55);
+}
+
+.card-plan__badge {
+  position: absolute;
+  top: -0.8rem;
+  left: 1.25rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-pill, 500px);
+  background: var(--accent-blue, #2563eb);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.card-plan__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.card-plan__nombre {
+  margin: 0;
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: var(--font-weight-bold, 700);
+}
+
+.card-plan__precio {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin: 0;
+  color: var(--text-primary, #ffffff);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.card-plan__precio small {
+  color: var(--text-secondary, #a7a7a7);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 500;
+}
+
+.card-plan__beneficios {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card-plan__beneficios li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  color: var(--text-secondary, #a7a7a7);
+  font-size: var(--font-size-sm, 0.875rem);
+  line-height: 1.4;
+}
+
+.card-plan__beneficios svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--accent-blue, #2563eb);
+}
+
+.card-plan__boton {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.7rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill, 500px);
+  background: var(--accent-blue, #2563eb);
+  color: #ffffff;
+  font-family: var(--font-family, inherit);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--transition-base, 0.3s ease),
+    opacity var(--transition-base, 0.3s ease);
+}
+
+.card-plan__boton:hover:not(:disabled) {
+  background: var(--accent-blue-hover, #1d4ed8);
+}
+
+.card-plan__boton:disabled {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: var(--text-secondary, #a7a7a7);
+  cursor: default;
+}
+
+.card-plan--actual .card-plan__boton:disabled {
+  border-color: rgba(74, 222, 128, 0.35);
+  color: #86efac;
+}

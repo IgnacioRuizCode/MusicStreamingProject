@@ -14,6 +14,7 @@ export interface User {
   role: Role;
   planId: string | null;
   createdAt?: string;
+  nextPaymentDate?: string;
   card?: Card;
   savedPlaylists: string[];
   followedArtists: string[];
@@ -49,10 +50,16 @@ export interface Playlist {
 
 export interface Plan {
   id: string;
-  name: string;
-  price: number;
-  benefits: string[];
-  featured: boolean;
+  nombre: string;
+  precio: number;
+  beneficios: string[];
+  destacado: boolean;
+}
+
+export interface ResumenPago {
+  planId: string;
+  ultimos4: string;
+  marca: string;
 }
 
 export interface CollectionMap {
@@ -82,5 +89,6 @@ export interface AuthContextType {
   register: (data: RegisterData) => AuthResult;
   login: (email: string, password: string) => AuthResult;
   logout: () => void;
-  subscribe: (planId: string) => AuthResult;
+  suscribirse: (planId: string, resumenPago?: ResumenPago) => AuthResult;
+  cancelarSuscripcion: () => AuthResult;
 }
