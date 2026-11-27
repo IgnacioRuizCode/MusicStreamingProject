@@ -19,3 +19,9 @@ export function normalizeText(value: string): string {
 export function getArtistImage(artist: string, songs: { artist: string; image: string }[]): string {
   return songs.find((song) => song.artist === artist)?.image ?? ''
 }
+
+export function getMaxInvitadosPorPlan(planId: string | null): number {
+  if (planId === 'plan-duo') return 1;
+  if (planId === 'plan-familiar') return 5;
+  return 0;
+}

@@ -5,19 +5,29 @@ export interface Card {
   brand: string;
 }
 
+export interface PlanMember {
+  name: string;
+  email: string;
+  status: 'Pendiente' | 'Activo';
+  invitedAt: string;
+}
+
 export interface User {
   id: string;
   email: string;
   password: string;
   username: string;
-  birthDate: string; 
+  birthDate: string;
+  avatar?: string;
   role: Role;
   planId: string | null;
   createdAt?: string;
   nextPaymentDate?: string;
   card?: Card;
+  invitedMembers?: PlanMember[];
   savedPlaylists: string[];
   followedArtists: string[];
+  likedSongs?: string[];
 }
 
 export type SessionUser = Omit<User, 'password'>;
@@ -36,7 +46,7 @@ export interface Song {
   artistId: string;
   cover: string;
   url: string;
-  duration: number; 
+  duration: number;
 }
 
 export interface Playlist {
@@ -79,6 +89,12 @@ export interface RegisterData {
   birthDate: string;
 }
 
+export interface UpdateProfileData {
+  username: string;
+  birthDate: string;
+  avatar?: string;
+}
+
 export type AuthResult =
   | { success: true; user?: SessionUser }
   | { success: false; error: string };
@@ -91,4 +107,12 @@ export interface AuthContextType {
   logout: () => void;
   suscribirse: (planId: string, resumenPago?: ResumenPago) => AuthResult;
   cancelarSuscripcion: () => AuthResult;
+  actualizarPerfil: (datos: UpdateProfileData) => AuthResult;
+  cambiarPassword: (actual: string, nueva: string) => AuthResult;
+  agregarInvitadoPlan: (nombre: string, email: string) => AuthResult;
+  eliminarInvitadoPlan: (email: string) => AuthResult;
+  toggleSavedPlaylist: (playlistId: string) => void;
+  toggleFollowedArtist: (artistId: string) => void;
+  toggleLikedSong: (songId: string) => void;
+  eliminarCuenta: () => AuthResult;
 }
