@@ -1,13 +1,27 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Clock, Pause, Play, Sparkles } from 'lucide-react';
+import {
+  Bookmark,
+  Clock,
+  Heart,
+  ListPlus,
+  Pause,
+  Play,
+  Sparkles,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import {
   getById,
   getPlaylistSongs,
   getAll,
+  notifyStorageChange,
+  update,
 } from '../services/storageServices';
 import { usePlayerContext } from '../context/PlayerContext';
+import { useAuth } from '../hooks/useAuth';
 import { useDominantColor } from '../hooks/useDominantColor';
 import type { Song } from '../types/types';
 import './PaginaPlaylist.css';
@@ -24,7 +38,13 @@ interface PlaylistSongRowProps {
   artistName: string;
   isCurrent: boolean;
   isPlaying: boolean;
+  isLiked: boolean;
+  canInteract: boolean;
+  isOwner: boolean;
   onSelect: (song: Song, isCurrent: boolean) => void;
+  onToggleLike: (song: Song) => void;
+  onOpenAddPlaylist: (song: Song) => void;
+  onRemoveFromPlaylist?: (song: Song) => void;
 }
 
 const PlaylistSongRow = memo(function PlaylistSongRow({
@@ -33,7 +53,13 @@ const PlaylistSongRow = memo(function PlaylistSongRow({
   artistName,
   isCurrent,
   isPlaying,
+  isLiked,
+  canInteract,
+  isOwner,
   onSelect,
+  onToggleLike,
+  onOpenAddPlaylist,
+  onRemoveFromPlaylist,
 }: PlaylistSongRowProps) {
   return (
     <motion.div
@@ -76,8 +102,46 @@ const PlaylistSongRow = memo(function PlaylistSongRow({
 
       <span className="playlist-song-artist">{artistName}</span>
 
-      <span className="playlist-song-duration">
-        {formatearDuracion(song.duration)}
+      <span
+        className="playlist-song-duration"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {canInteract && (
+          <>
+            <button
+              type="button"
+              className={`playlist-song-action-btn${isLiked ? ' is-liked' : ''}`}
+              aria-label={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+              title={isLiked ? 'Quitar de favoritos' : 'Me gusta'}
+              onClick={() => onToggleLike(song)}
+            >
+              <Heart size={15} fill={isLiked ? 'currentColor' : 'none'} />
+            </button>
+
+            <button
+              type="button"
+              className="playlist-song-action-btn"
+              aria-label="Agregar a una playlist"
+              title="Agregar a mi playlist"
+              onClick={() => onOpenAddPlaylist(song)}
+            >
+              <ListPlus size={15} />
+            </button>
+
+            {isOwner && onRemoveFromPlaylist && (
+              <button
+                type="button"
+                className="playlist-song-action-btn playlist-song-action-btn--danger"
+                aria-label="Quitar de esta playlist"
+                title="Quitar de esta playlist"
+                onClick={() => onRemoveFromPlaylist(song)}
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
+          </>
+        )}
+        <span>{formatearDuracion(song.duration)}</span>
       </span>
     </motion.div>
   );
@@ -86,17 +150,27 @@ const PlaylistSongRow = memo(function PlaylistSongRow({
 export function PaginaPlaylist() {
   const { id } = useParams<{ id: string }>();
   const { currentSong, isPlaying, playSong, togglePlay } = usePlayerContext();
+  const { user, toggleSavedPlaylist, toggleLikedSong } = useAuth();
+  const [refreshTick, setRefreshTick] = useState(0);
+  const [songForPlaylist, setSongForPlaylist] = useState<Song | null>(null);
 
-  const playlist = useMemo(
-    () => (id ? getById('playlists', id) : undefined),
-    [id],
-  );
+  const playlist = useMemo(() => {
+    void refreshTick;
+    return id ? getById('playlists', id) : undefined;
+  }, [id, refreshTick]);
+
   const headerColor = useDominantColor(playlist?.cover);
 
-  const canciones = useMemo(
-    () => (playlist ? getPlaylistSongs(playlist.id) : []),
-    [playlist],
-  );
+  const canciones = useMemo(() => {
+    void refreshTick;
+    return playlist ? getPlaylistSongs(playlist.id) : [];
+  }, [playlist, refreshTick]);
+
+  const creatorName = useMemo(() => {
+    if (!playlist) return 'Codify';
+    const creator = getById('users', playlist.creatorId);
+    return creator?.username ?? 'Codify';
+  }, [playlist]);
 
   const artistNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -104,9 +178,19 @@ export function PaginaPlaylist() {
     return map;
   }, []);
 
+  const userCreatedPlaylists = useMemo(() => {
+    if (!user) return [];
+    return getAll('playlists').filter((p) => p.creatorId === user.id);
+  }, [user]);
+
   const duracionTotal = useMemo(
     () => canciones.reduce((total, cancion) => total + cancion.duration, 0),
     [canciones],
+  );
+
+  const isOwner = Boolean(user && playlist && playlist.creatorId === user.id);
+  const isSaved = Boolean(
+    user && playlist && user.savedPlaylists.includes(playlist.id),
   );
 
   const isPlaylistPlaying =
@@ -135,6 +219,48 @@ export function PaginaPlaylist() {
     },
     [canciones, playSong, togglePlay],
   );
+
+  const handleToggleLike = useCallback(
+    (song: Song) => {
+      if (!user) return;
+      const yaTieneLike = user.likedSongs?.includes(song.id) ?? false;
+      toggleLikedSong(song.id);
+      toast.success(
+        yaTieneLike
+          ? `"${song.title}" quitada de favoritos`
+          : `"${song.title}" agregada a favoritos`,
+      );
+    },
+    [toggleLikedSong, user],
+  );
+
+  const handleRemoveFromPlaylist = useCallback(
+    (song: Song) => {
+      if (!playlist || !isOwner) return;
+      update('playlists', playlist.id, {
+        songIds: playlist.songIds.filter((sId) => sId !== song.id),
+      });
+      notifyStorageChange();
+      setRefreshTick((v) => v + 1);
+      toast.info(`"${song.title}" quitada de la playlist`);
+    },
+    [isOwner, playlist],
+  );
+
+  const handleAddSongToPlaylist = (targetPlaylistId: string, songId: string) => {
+    const pl = getById('playlists', targetPlaylistId);
+    if (!pl) return;
+    if (pl.songIds.includes(songId)) {
+      toast.info('Esa canción ya está en la playlist');
+      setSongForPlaylist(null);
+      return;
+    }
+    update('playlists', targetPlaylistId, { songIds: [...pl.songIds, songId] });
+    notifyStorageChange();
+    setRefreshTick((v) => v + 1);
+    toast.success(`Agregada a "${pl.title}"`);
+    setSongForPlaylist(null);
+  };
 
   if (!playlist) {
     return (
@@ -178,7 +304,7 @@ export function PaginaPlaylist() {
 
         <div className="playlist-info">
           <span className="playlist-badge">
-            <Sparkles size={13} /> Playlist editorial
+            <Sparkles size={13} /> {isOwner ? 'Tu playlist' : 'Playlist editorial'}
           </span>
 
           <h1 className="playlist-title">{playlist.title}</h1>
@@ -186,7 +312,7 @@ export function PaginaPlaylist() {
           <p className="playlist-description">{playlist.description}</p>
 
           <p className="playlist-details">
-            <strong>SoundWave</strong> · {canciones.length} canciones ·{' '}
+            <strong>{creatorName}</strong> · {canciones.length} canciones ·{' '}
             {formatearDuracion(duracionTotal)}
           </p>
         </div>
@@ -209,6 +335,24 @@ export function PaginaPlaylist() {
               <Play size={22} fill="currentColor" />
             )}
           </motion.button>
+
+          {user && !isOwner && (
+            <button
+              type="button"
+              className="btn btn--secondary"
+              onClick={() => {
+                toggleSavedPlaylist(playlist.id);
+                toast.success(
+                  isSaved
+                    ? 'Playlist quitada de tu biblioteca'
+                    : 'Playlist guardada en tu biblioteca',
+                );
+              }}
+            >
+              <Bookmark size={16} fill={isSaved ? 'currentColor' : 'none'} />
+              {isSaved ? 'Guardada' : 'Guardar en biblioteca'}
+            </button>
+          )}
         </div>
 
         {canciones.length === 0 ? (
@@ -234,12 +378,72 @@ export function PaginaPlaylist() {
                 artistName={artistNameById.get(cancion.artistId) ?? cancion.artistId}
                 isCurrent={currentSong?.id === cancion.id}
                 isPlaying={isPlaying}
+                isLiked={user?.likedSongs?.includes(cancion.id) ?? false}
+                canInteract={Boolean(user)}
+                isOwner={isOwner}
                 onSelect={handleSongSelect}
+                onToggleLike={handleToggleLike}
+                onOpenAddPlaylist={(s) => setSongForPlaylist(s)}
+                onRemoveFromPlaylist={handleRemoveFromPlaylist}
               />
             ))}
           </div>
         )}
       </section>
+
+      {songForPlaylist && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="playlist-picker__backdrop"
+          onClick={() => setSongForPlaylist(null)}
+        >
+          <div
+            className="playlist-picker__dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="playlist-picker__header">
+              <h3 className="playlist-picker__title">
+                Agregar &ldquo;{songForPlaylist.title}&rdquo; a...
+              </h3>
+              <button
+                type="button"
+                className="playlist-song-action-btn"
+                aria-label="Cerrar"
+                onClick={() => setSongForPlaylist(null)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            {userCreatedPlaylists.length === 0 ? (
+              <p className="playlist-picker__empty">
+                Todavía no creaste ninguna playlist propia. Podés crear una desde{' '}
+                <Link
+                  to="/biblioteca"
+                  className="playlist-picker__link"
+                  onClick={() => setSongForPlaylist(null)}
+                >
+                  Tu biblioteca
+                </Link>
+                .
+              </p>
+            ) : (
+              <div className="playlist-picker__list">
+                {userCreatedPlaylists.map((pl) => (
+                  <button
+                    key={pl.id}
+                    type="button"
+                    className="btn btn--secondary playlist-picker__option"
+                    onClick={() => handleAddSongToPlaylist(pl.id, songForPlaylist.id)}
+                  >
+                    {pl.title}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </motion.main>
   );
 }

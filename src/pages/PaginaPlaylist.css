@@ -262,3 +262,41 @@
     display: block;
   }
 }
+.playlist-table-head,
+.playlist-song {
+  grid-template-columns: 36px minmax(180px, 2fr) minmax(120px, 1.2fr) minmax(110px, auto);
+}
+
+.playlist-song-duration {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.playlist-song-action-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary, #94a3b8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.playlist-song-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.playlist-song-action-btn.is-liked {
+  color: #ec4899;
+}
+
+.playlist-song-action-btn--danger {
+  color: #f87171;
+}
