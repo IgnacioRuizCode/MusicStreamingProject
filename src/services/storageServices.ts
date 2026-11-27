@@ -376,3 +376,35 @@ export function deleteUserSafe(targetUserId: string, currentAdminId: string): vo
   const deleted = deleteById('users', targetUserId);
   if (!deleted) throw new Error('Usuario no encontrado.');
 }
+
+export function notifyStorageChange(): void {
+  window.dispatchEvent(new Event('storage'));
+}
+
+export function createUserPlaylist(
+  userId: string,
+  data: { title: string; description?: string; cover?: string },
+): Playlist {
+  const defaultCover =
+    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80';
+
+  const created = add('playlists', {
+    title: data.title.trim(),
+    description: data.description?.trim() || 'Playlist creada por vos en Codify.',
+    cover: data.cover?.trim() || defaultCover,
+    creatorId: userId,
+    songIds: [],
+  });
+
+  notifyStorageChange();
+  return created;
+}
+
+export function deleteUserPlaylist(playlistId: string, userId: string): boolean {
+  const playlist = getById('playlists', playlistId);
+  if (!playlist || playlist.creatorId !== userId) return false;
+
+  const deleted = deleteById('playlists', playlistId);
+  if (deleted) notifyStorageChange();
+  return deleted;
+}

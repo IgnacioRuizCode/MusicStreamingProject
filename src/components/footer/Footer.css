@@ -1,7 +1,11 @@
 .footer {
   width: 100%;
-  padding: 36px 24px 28px;
-  background-color: var(--bg-base);
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-top: 0;
+  padding: 2rem 0.5rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
   color: var(--text-primary);
   font-family: var(--font-family);
 }
@@ -9,25 +13,27 @@
 .footer__top {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 1.75rem;
 }
 
 .footer__columns {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
 }
 
 .footer__column {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0.65rem;
 }
 
 .footer__heading {
   margin: 0;
-  font-size: var(--font-size-md);
+  font-size: 0.74rem;
   font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text-primary);
 }
 
@@ -37,21 +43,23 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .footer__link {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-regular);
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
   text-decoration: none;
-  transition: color var(--transition-base);
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .footer__link:hover,
 .footer__link:focus-visible {
-  color: var(--text-secondary-hover);
-  text-decoration: underline;
+  color: #60a5fa;
+  transform: translateX(3px);
 }
 
 .footer__social {
@@ -66,64 +74,87 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: var(--radius-pill);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background-color: var(--bg-elevated);
   color: var(--text-primary);
   text-decoration: none;
   transition:
-    background-color var(--transition-base),
-    transform var(--transition-base);
+    transform 0.22s ease,
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
 .footer__social-link:hover,
 .footer__social-link:focus-visible {
-  background-color: var(--bg-elevated-hover);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.06);
+}
+
+.footer__social-link[aria-label='Instagram']:hover,
+.footer__social-link[aria-label='Instagram']:focus-visible {
+  background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border-color: transparent;
+  box-shadow: 0 8px 22px rgba(220, 39, 67, 0.42);
+}
+
+.footer__social-link[aria-label='Twitter / X']:hover,
+.footer__social-link[aria-label='Twitter / X']:focus-visible {
+  background: #0f0f12;
+  border-color: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 8px 22px rgba(255, 255, 255, 0.16);
+}
+
+.footer__social-link[aria-label='Facebook']:hover,
+.footer__social-link[aria-label='Facebook']:focus-visible {
+  background: #1877f2;
+  border-color: transparent;
+  box-shadow: 0 8px 22px rgba(24, 119, 242, 0.45);
 }
 
 .footer__social-icon {
-  font-size: var(--font-size-md);
+  font-size: 1rem;
 }
 
 .footer__divider {
   border: none;
-  border-top: 1px solid var(--bg-elevated);
-  margin: 28px 0 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 1.5rem 0 1.15rem;
 }
 
 .footer__bottom {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0.75rem;
 }
 
 .footer__legal {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 20px;
+  gap: 0.65rem 1.15rem;
 }
 
 .footer__legal-link {
-  font-size: var(--font-size-sm);
+  font-size: 0.78rem;
   color: var(--text-secondary);
   text-decoration: none;
-  transition: color var(--transition-base);
+  transition: color 0.2s ease;
 }
 
 .footer__legal-link:hover,
 .footer__legal-link:focus-visible {
-  color: var(--text-secondary-hover);
+  color: var(--text-primary);
 }
 
 .footer__copyright {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: 0.78rem;
   color: var(--text-muted);
 }
 
 @media (min-width: 768px) {
   .footer {
-    padding: 44px 32px 32px;
+    padding: 3rem 0.5rem 2rem;
   }
 
   .footer__top {
@@ -133,6 +164,7 @@
   }
 
   .footer__columns {
+    display: flex;
     flex-direction: row;
     gap: 64px;
   }

@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { useState } from 'react';
 import { obtenerIniciales } from '../../utils/obtenerIniciales';
 
 interface AvatarProps {
@@ -7,15 +7,39 @@ interface AvatarProps {
   foto?: string;
 }
 
+function getFallbackInitials(nombre: string): string {
+  const fromUtil = obtenerIniciales(nombre)?.trim();
+  if (fromUtil) return fromUtil;
+  return nombre
+    .replace(/,/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
 export function Avatar({ nombre, color, foto }: AvatarProps) {
-  const estilo = { '--avatar-color': color } as CSSProperties;
+  const [imgFailed, setImgFailed] = useState(false);
+  const showPhoto = Boolean(foto && foto.trim() !== '' && !imgFailed);
 
   return (
-    <span className="about-avatar" style={estilo} aria-hidden="true">
-      {foto ? (
-        <img className="about-avatar__image" src={foto} alt="" />
+    <span
+      className="about-avatar"
+      style={{ backgroundColor: color }}
+      aria-hidden="true"
+    >
+      {showPhoto ? (
+        <img
+          className="about-avatar__image"
+          src={foto}
+          alt=""
+          onError={() => setImgFailed(true)}
+        />
       ) : (
-        <span className="about-avatar__initials">{obtenerIniciales(nombre)}</span>
+        <span className="about-avatar__initials">
+          {getFallbackInitials(nombre)}
+        </span>
       )}
     </span>
   );

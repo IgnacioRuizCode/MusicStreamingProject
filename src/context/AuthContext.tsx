@@ -3,19 +3,26 @@ import { z } from 'zod';
 import {
   add,
   clearSession,
+  deleteById,
+  getAll,
   getById,
   getPlanById,
   getSession,
   getUserByEmail,
+  notifyStorageChange,
+  save,
   saveSession,
   update,
 } from '../services/storageServices';
+import { STORAGE_KEYS } from '../services/storageKeys';
 import type {
   AuthContextType,
   AuthResult,
+  PlanMember,
   RegisterData,
   ResumenPago,
   SessionUser,
+  UpdateProfileData,
   User,
 } from '../types/types';
 
@@ -26,13 +33,25 @@ const storedSessionSchema = z.object({
 function toSessionUser(user: User): SessionUser {
   const safeUser = { ...user };
   delete (safeUser as Partial<User>).password;
-  return safeUser;
+  return {
+    ...safeUser,
+    savedPlaylists: safeUser.savedPlaylists ?? [],
+    followedArtists: safeUser.followedArtists ?? [],
+    likedSongs: safeUser.likedSongs ?? [],
+    invitedMembers: safeUser.invitedMembers ?? [],
+  };
 }
 
 function calcularProximoCobro(): string {
   const fecha = new Date();
   fecha.setMonth(fecha.getMonth() + 1);
   return fecha.toISOString();
+}
+
+function getMaxInvitadosPorPlan(planId: string | null): number {
+  if (planId === 'plan-duo') return 1;
+  if (planId === 'plan-familiar') return 5;
+  return 0;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -45,6 +64,14 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const syncUserState = (updatedUser: User): SessionUser => {
+    const safeUser = toSessionUser(updatedUser);
+    saveSession(safeUser);
+    setUser(safeUser);
+    notifyStorageChange();
+    return safeUser;
+  };
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -86,21 +113,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     const newUser = add('users', {
-        username: data.username.trim(),
-        email: normalizedEmail,
-        password: data.password,
-        role: 'user',
-        planId: null,
-        savedPlaylists: [],
-        followedArtists: [],
-        createdAt: new Date().toISOString(),
-        birthDate: data.birthDate,
+      username: data.username.trim(),
+      email: normalizedEmail,
+      password: data.password,
+      role: 'user',
+      planId: null,
+      savedPlaylists: [],
+      followedArtists: [],
+      likedSongs: [],
+      invitedMembers: [],
+      createdAt: new Date().toISOString(),
+      birthDate: data.birthDate,
     });
 
-    const safeUser = toSessionUser(newUser);
-    saveSession(safeUser);
-    setUser(safeUser);
-
+    const safeUser = syncUserState(newUser);
     return { success: true, user: safeUser };
   };
 
@@ -115,10 +141,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
     }
 
-    const safeUser = toSessionUser(foundUser);
-    saveSession(safeUser);
-    setUser(safeUser);
-
+    const safeUser = syncUserState(foundUser);
     return { success: true, user: safeUser };
   };
 
@@ -147,6 +170,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     const esPago = plan.precio > 0;
+    const maxInvitados = getMaxInvitadosPorPlan(planId);
+    const currentMembers = user.invitedMembers ?? [];
+
     const updatedUser = update('users', user.id, {
       planId,
       card:
@@ -154,6 +180,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           ? { last4: resumenPago.ultimos4, brand: resumenPago.marca }
           : undefined,
       nextPaymentDate: esPago ? calcularProximoCobro() : undefined,
+      invitedMembers: maxInvitados > 0 ? currentMembers.slice(0, maxInvitados) : [],
     });
 
     if (!updatedUser) {
@@ -163,10 +190,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
     }
 
-    const safeUser = toSessionUser(updatedUser);
-    saveSession(safeUser);
-    setUser(safeUser);
-
+    const safeUser = syncUserState(updatedUser);
     return { success: true, user: safeUser };
   };
 
@@ -182,6 +206,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       planId: null,
       card: undefined,
       nextPaymentDate: undefined,
+      invitedMembers: [],
     });
 
     if (!updatedUser) {
@@ -191,11 +216,179 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
     }
 
-    const safeUser = toSessionUser(updatedUser);
-    saveSession(safeUser);
-    setUser(safeUser);
-
+    const safeUser = syncUserState(updatedUser);
     return { success: true, user: safeUser };
+  };
+
+  const actualizarPerfil = (datos: UpdateProfileData): AuthResult => {
+    if (!user) {
+      return { success: false, error: 'Sesión no iniciada.' };
+    }
+
+    const updatedUser = update('users', user.id, {
+      username: datos.username.trim(),
+      birthDate: datos.birthDate,
+      avatar: datos.avatar?.trim() || undefined,
+    });
+
+    if (!updatedUser) {
+      return { success: false, error: 'No se pudo actualizar el perfil.' };
+    }
+
+    const safeUser = syncUserState(updatedUser);
+    return { success: true, user: safeUser };
+  };
+
+  const cambiarPassword = (actual: string, nueva: string): AuthResult => {
+    if (!user) {
+      return { success: false, error: 'Sesión no iniciada.' };
+    }
+
+    const dbUser = getById('users', user.id);
+    if (!dbUser) {
+      return { success: false, error: 'Usuario no encontrado.' };
+    }
+
+    if (dbUser.password !== actual) {
+      return { success: false, error: 'La contraseña actual es incorrecta.' };
+    }
+
+    const updatedUser = update('users', user.id, { password: nueva });
+    if (!updatedUser) {
+      return { success: false, error: 'No se pudo actualizar la contraseña.' };
+    }
+
+    return { success: true };
+  };
+
+  const agregarInvitadoPlan = (nombre: string, email: string): AuthResult => {
+    if (!user) {
+      return { success: false, error: 'Sesión no iniciada.' };
+    }
+
+    const maxInvitados = getMaxInvitadosPorPlan(user.planId);
+    if (maxInvitados === 0) {
+      return {
+        success: false,
+        error: 'Tu plan actual no permite agregar miembros invitados.',
+      };
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (normalizedEmail === user.email.toLowerCase()) {
+      return {
+        success: false,
+        error: 'Ya sos el titular de este plan.',
+      };
+    }
+
+    const currentMembers = user.invitedMembers ?? [];
+    if (currentMembers.length >= maxInvitados) {
+      return {
+        success: false,
+        error: `Alcanzaste el límite de ${maxInvitados} invitado(s) para tu plan.`,
+      };
+    }
+
+    if (currentMembers.some((m) => m.email.toLowerCase() === normalizedEmail)) {
+      return {
+        success: false,
+        error: 'Ese correo ya fue invitado a tu plan.',
+      };
+    }
+
+    const nuevoMiembro: PlanMember = {
+      name: nombre.trim(),
+      email: normalizedEmail,
+      status: 'Pendiente',
+      invitedAt: new Date().toISOString(),
+    };
+
+    const updatedUser = update('users', user.id, {
+      invitedMembers: [...currentMembers, nuevoMiembro],
+    });
+
+    if (!updatedUser) {
+      return { success: false, error: 'No se pudo registrar la invitación.' };
+    }
+
+    const safeUser = syncUserState(updatedUser);
+    return { success: true, user: safeUser };
+  };
+
+  const eliminarInvitadoPlan = (email: string): AuthResult => {
+    if (!user) {
+      return { success: false, error: 'Sesión no iniciada.' };
+    }
+
+    const currentMembers = user.invitedMembers ?? [];
+    const updatedUser = update('users', user.id, {
+      invitedMembers: currentMembers.filter(
+        (m) => m.email.toLowerCase() !== email.toLowerCase(),
+      ),
+    });
+
+    if (!updatedUser) {
+      return { success: false, error: 'No se pudo quitar al invitado.' };
+    }
+
+    const safeUser = syncUserState(updatedUser);
+    return { success: true, user: safeUser };
+  };
+
+  const toggleSavedPlaylist = (playlistId: string): void => {
+    if (!user) return;
+    const current = user.savedPlaylists ?? [];
+    const exists = current.includes(playlistId);
+    const updatedUser = update('users', user.id, {
+      savedPlaylists: exists
+        ? current.filter((id) => id !== playlistId)
+        : [...current, playlistId],
+    });
+    if (updatedUser) syncUserState(updatedUser);
+  };
+
+  const toggleFollowedArtist = (artistId: string): void => {
+    if (!user) return;
+    const current = user.followedArtists ?? [];
+    const exists = current.includes(artistId);
+    const updatedUser = update('users', user.id, {
+      followedArtists: exists
+        ? current.filter((id) => id !== artistId)
+        : [...current, artistId],
+    });
+    if (updatedUser) syncUserState(updatedUser);
+  };
+
+  const toggleLikedSong = (songId: string): void => {
+    if (!user) return;
+    const current = user.likedSongs ?? [];
+    const exists = current.includes(songId);
+    const updatedUser = update('users', user.id, {
+      likedSongs: exists
+        ? current.filter((id) => id !== songId)
+        : [...current, songId],
+    });
+    if (updatedUser) syncUserState(updatedUser);
+  };
+
+  const eliminarCuenta = (): AuthResult => {
+    if (!user) {
+      return { success: false, error: 'Sesión no iniciada.' };
+    }
+
+    // Eliminar playlists creadas por el usuario
+    const allPlaylists = getAll('playlists');
+    save(
+      STORAGE_KEYS.playlists,
+      allPlaylists.filter((pl) => pl.creatorId !== user.id),
+    );
+
+    deleteById('users', user.id);
+    clearSession();
+    setUser(null);
+    notifyStorageChange();
+    return { success: true };
   };
 
   return (
@@ -208,6 +401,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         logout,
         suscribirse,
         cancelarSuscripcion,
+        actualizarPerfil,
+        cambiarPassword,
+        agregarInvitadoPlan,
+        eliminarInvitadoPlan,
+        toggleSavedPlaylist,
+        toggleFollowedArtist,
+        toggleLikedSong,
+        eliminarCuenta,
       }}
     >
       {children}

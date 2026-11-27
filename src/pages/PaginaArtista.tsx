@@ -1,24 +1,22 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Play } from 'lucide-react';
-
+import { Heart, ListPlus, Play, X } from 'lucide-react';
+import { toast } from 'sonner';
 import {
-  getById,
+  getAll,
   getArtistSongs,
+  getById,
+  notifyStorageChange,
   update,
 } from '../services/storageServices';
-
 import { usePlayer } from '../hooks/usePlayer';
 import { useAuth } from '../hooks/useAuth';
-
 import type { Artist, Song } from '../types/types';
-
 import './PaginaArtista.css';
 
 function formatearDuracion(segundos: number): string {
   const minutos = Math.floor(segundos / 60);
-  const segundosRestantes = segundos % 60;
-
+  const segundosRestantes = Math.floor(segundos % 60);
   return `${minutos}:${String(segundosRestantes).padStart(2, '0')}`;
 }
 
@@ -29,18 +27,34 @@ function formatearOyentes(cantidad: number): string {
 interface ArtistSongRowProps {
   song: Song;
   index: number;
+  isLiked: boolean;
+  canInteract: boolean;
   onPlay: (song: Song) => void;
+  onToggleLike: (song: Song) => void;
+  onOpenAddPlaylist: (song: Song) => void;
 }
 
 const ArtistSongRow = memo(function ArtistSongRow({
   song,
   index,
+  isLiked,
+  canInteract,
   onPlay,
+  onToggleLike,
+  onOpenAddPlaylist,
 }: ArtistSongRowProps) {
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       className="artist-song-row"
       onClick={() => onPlay(song)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onPlay(song);
+        }
+      }}
     >
       <span className="artist-song-number">{index + 1}</span>
 
@@ -54,10 +68,37 @@ const ArtistSongRow = memo(function ArtistSongRow({
 
       <span className="artist-song-title">{song.title}</span>
 
+      {canInteract && (
+        <div
+          className="artist-song-actions"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            className={`artist-song-action-btn${isLiked ? ' is-liked' : ''}`}
+            aria-label={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            title={isLiked ? 'Quitar de favoritos' : 'Me gusta'}
+            onClick={() => onToggleLike(song)}
+          >
+            <Heart size={16} fill={isLiked ? 'currentColor' : 'none'} />
+          </button>
+
+          <button
+            type="button"
+            className="artist-song-action-btn"
+            aria-label="Agregar a una playlist"
+            title="Agregar a mi playlist"
+            onClick={() => onOpenAddPlaylist(song)}
+          >
+            <ListPlus size={16} />
+          </button>
+        </div>
+      )}
+
       <span className="artist-song-duration">
         {formatearDuracion(song.duration)}
       </span>
-    </button>
+    </div>
   );
 });
 
@@ -66,13 +107,10 @@ export function PaginaArtista() {
   const navigate = useNavigate();
 
   const { playSong } = usePlayer();
-  const { user, loading } = useAuth();
+  const { user, loading, toggleFollowedArtist, toggleLikedSong } = useAuth();
 
   const [mostrarTodasKey, setMostrarTodasKey] = useState<string | null>(null);
-  const [followOverride, setFollowOverride] = useState<{
-    key: string;
-    value: boolean;
-  } | null>(null);
+  const [songForPlaylist, setSongForPlaylist] = useState<Song | null>(null);
 
   const artista = useMemo<Artist | undefined>(
     () => (id ? getById('artists', id) : undefined),
@@ -84,21 +122,20 @@ export function PaginaArtista() {
     [artista],
   );
 
+  const userCreatedPlaylists = useMemo(() => {
+    if (!user) return [];
+    return getAll('playlists').filter((p) => p.creatorId === user.id);
+  }, [user]);
+
   const mostrarTodas = Boolean(artista && mostrarTodasKey === artista.id);
   const cancionesPopulares = useMemo(
     () => (mostrarTodas ? canciones : canciones.slice(0, 5)),
     [canciones, mostrarTodas],
   );
 
-  const seguidoEnStorage = useMemo(() => {
-    if (!user || !artista) return false;
-    const storedUser = getById('users', user.id);
-    return storedUser?.followedArtists.includes(artista.id) ?? false;
-  }, [artista, user]);
-
-  const followKey = `${user?.id ?? 'guest'}:${artista?.id ?? 'none'}`;
-  const estaSiguiendo =
-    followOverride?.key === followKey ? followOverride.value : seguidoEnStorage;
+  const estaSiguiendo = Boolean(
+    user && artista && user.followedArtists.includes(artista.id),
+  );
 
   const reproducirCancion = useCallback(
     (cancion: Song) => {
@@ -122,24 +159,41 @@ export function PaginaArtista() {
       return;
     }
 
-    const usuarioActualizado = getById('users', user.id);
+    toggleFollowedArtist(artista.id);
+    toast.success(
+      estaSiguiendo
+        ? `Dejaste de seguir a ${artista.name}`
+        : `Ahora seguís a ${artista.name}`,
+    );
+  }, [artista, estaSiguiendo, loading, navigate, toggleFollowedArtist, user]);
 
-    if (!usuarioActualizado) return;
+  const handleToggleLike = useCallback(
+    (song: Song) => {
+      if (!user) return;
+      const yaTieneLike = user.likedSongs?.includes(song.id) ?? false;
+      toggleLikedSong(song.id);
+      toast.success(
+        yaTieneLike
+          ? `"${song.title}" quitada de favoritos`
+          : `"${song.title}" agregada a favoritos`,
+      );
+    },
+    [toggleLikedSong, user],
+  );
 
-    const nuevaLista = estaSiguiendo
-      ? usuarioActualizado.followedArtists.filter(
-          (artistId) => artistId !== artista.id
-        )
-      : [...usuarioActualizado.followedArtists, artista.id];
-
-    const actualizado = update('users', user.id, {
-      followedArtists: nuevaLista,
-    });
-
-    if (actualizado) {
-      setFollowOverride({ key: followKey, value: !estaSiguiendo });
+  const handleAddSongToPlaylist = (playlistId: string, songId: string) => {
+    const pl = getById('playlists', playlistId);
+    if (!pl) return;
+    if (pl.songIds.includes(songId)) {
+      toast.info('Esa canción ya está en la playlist');
+      setSongForPlaylist(null);
+      return;
     }
-  }, [artista, estaSiguiendo, followKey, loading, navigate, user]);
+    update('playlists', playlistId, { songIds: [...pl.songIds, songId] });
+    notifyStorageChange();
+    toast.success(`Agregada a "${pl.title}"`);
+    setSongForPlaylist(null);
+  };
 
   if (!artista) {
     return (
@@ -160,12 +214,8 @@ export function PaginaArtista() {
       >
         <div className="artist-header-content">
           <span className="artist-label">Artista</span>
-
           <h1>{artista.name}</h1>
-
-          <p>
-            {formatearOyentes(artista.monthlyListeners)} oyentes mensuales
-          </p>
+          <p>{formatearOyentes(artista.monthlyListeners)} oyentes mensuales</p>
         </div>
       </header>
 
@@ -180,9 +230,7 @@ export function PaginaArtista() {
         </button>
 
         <button
-          className={`artist-follow-button ${
-            estaSiguiendo ? 'following' : ''
-          }`}
+          className={`artist-follow-button ${estaSiguiendo ? 'following' : ''}`}
           onClick={cambiarSeguimiento}
           disabled={loading}
           aria-pressed={estaSiguiendo}
@@ -205,7 +253,11 @@ export function PaginaArtista() {
                 key={cancion.id}
                 song={cancion}
                 index={index}
+                isLiked={user?.likedSongs?.includes(cancion.id) ?? false}
+                canInteract={Boolean(user)}
                 onPlay={reproducirCancion}
+                onToggleLike={handleToggleLike}
+                onOpenAddPlaylist={(s) => setSongForPlaylist(s)}
               />
             ))}
           </div>
@@ -225,11 +277,64 @@ export function PaginaArtista() {
 
       <section className="artist-discography">
         <h2>Discografía</h2>
-
         <p>
           Próximamente encontrarás aquí los álbumes y lanzamientos de este artista.
         </p>
       </section>
+
+      {songForPlaylist && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="add-to-playlist__backdrop"
+          onClick={() => setSongForPlaylist(null)}
+        >
+          <div
+            className="add-to-playlist__dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="add-to-playlist__header">
+              <h3 className="add-to-playlist__title">
+                Agregar &ldquo;{songForPlaylist.title}&rdquo; a...
+              </h3>
+              <button
+                type="button"
+                className="artist-song-action-btn"
+                aria-label="Cerrar"
+                onClick={() => setSongForPlaylist(null)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            {userCreatedPlaylists.length === 0 ? (
+              <p className="add-to-playlist__empty">
+                Todavía no creaste ninguna playlist propia. Podés crear una desde{' '}
+                <Link
+                  to="/biblioteca"
+                  className="add-to-playlist__link"
+                  onClick={() => setSongForPlaylist(null)}
+                >
+                  Tu biblioteca
+                </Link>
+                .
+              </p>
+            ) : (
+              <div className="add-to-playlist__list">
+                {userCreatedPlaylists.map((pl) => (
+                  <button
+                    key={pl.id}
+                    type="button"
+                    className="btn btn--secondary add-to-playlist__option"
+                    onClick={() => handleAddSongToPlaylist(pl.id, songForPlaylist.id)}
+                  >
+                    {pl.title}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -7,8 +7,9 @@
   min-width: 0;
   max-width: 1180px;
   margin: 0 auto;
-  padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 40px) 56px;
-  overflow-wrap: anywhere;
+  padding: 1.25rem 1.5rem 3.5rem;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
 }
 
 .about-page *,
@@ -38,9 +39,9 @@
   isolation: isolate;
   display: grid;
   justify-items: center;
-  gap: 18px;
-  padding: clamp(32px, 6vw, 72px) clamp(20px, 5vw, 56px);
-  border-radius: 24px;
+  gap: 14px;
+  padding: clamp(28px, 4.5vw, 48px) clamp(18px, 4vw, 44px);
+  border-radius: 20px;
   overflow: hidden;
   text-align: center;
   background: linear-gradient(
@@ -63,45 +64,46 @@
 .about-hero__logo {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 8px 18px;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 16px;
   border: 1px solid rgba(255, 255, 255, 0.38);
   border-radius: var(--radius-pill, 500px);
   background: rgba(0, 0, 0, 0.28);
-  color: #fff;
+  color: #ffffff;
+  font-size: 0.85rem;
   font-weight: var(--font-weight-black, 900);
   letter-spacing: 0.14em;
 }
 
 .about-hero__logo svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 .about-hero h1 {
   margin: 0;
-  color: #fff;
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  line-height: 1.05;
+  color: #ffffff;
+  font-size: clamp(1.75rem, 4vw, 2.85rem);
+  line-height: 1.1;
 }
 
 .about-hero p {
   margin: 0;
   max-width: 56ch;
   color: #f0f0ff;
-  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
   line-height: 1.5;
 }
 
 .about-section {
-  margin-top: clamp(36px, 6vw, 64px);
+  margin-top: clamp(28px, 4.5vw, 48px);
 }
 
 .about-section > h2 {
-  margin: 0 0 18px;
-  color: var(--text-primary, #fff);
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin: 0 0 16px;
+  color: var(--text-primary, #ffffff);
+  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
   line-height: 1.2;
 }
 
@@ -109,15 +111,14 @@
   margin: 0 0 12px;
   max-width: 75ch;
   color: var(--text-secondary, #a7a7a7);
-  line-height: 1.7;
+  line-height: 1.65;
 }
 
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  grid-auto-flow: row;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: stretch;
-  gap: 20px;
+  gap: 16px;
 }
 
 .team-card {
@@ -127,12 +128,13 @@
   width: 100%;
   height: 100%;
   min-width: 0;
-  padding: 24px;
+  padding: 20px 16px;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   background: var(--about-surface);
-  transition: transform var(--transition-base, 0.3s ease),
+  transition:
+    transform var(--transition-base, 0.3s ease),
     background var(--transition-base, 0.3s ease),
     border-color var(--transition-base, 0.3s ease);
 }
@@ -144,76 +146,79 @@
 }
 
 .about-avatar {
-  display: grid;
-  place-items: center;
-  align-self: center;
-  width: 160px;
-  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
   flex: none;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.35);
   border-radius: 50%;
-  background: var(--avatar-color, var(--primary-hover, #1e14b8));
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 .about-avatar__initials {
-  color: #fff;
-  font-size: 2.5rem;
-  font-weight: var(--font-weight-black, 900);
+  color: #ffffff;
+  font-size: 1.75rem;
+  font-weight: 900;
   letter-spacing: 0.04em;
+  line-height: 1;
+  user-select: none;
 }
 
 .about-avatar__image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .team-card__name {
-  margin: 16px 0 8px;
-  color: var(--text-primary, #fff);
-  font-size: var(--font-size-lg, 1.125rem);
-  line-height: 1.35;
+  margin: 14px 0 8px;
+  color: var(--text-primary, #ffffff);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .team-card__role {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
+  min-height: 26px;
   margin: 0;
-  padding: 4px 12px;
+  padding: 3px 11px;
   border-radius: var(--radius-pill, 500px);
-  font-size: 0.8rem;
-  font-weight: var(--font-weight-bold, 700);
+  font-size: 0.76rem;
+  font-weight: 700;
 }
 
 .team-card__role--tech-leader {
-  background: rgba(30, 20, 184, 0.38);
+  background: rgba(30, 20, 184, 0.42);
   color: #c3c9ff;
 }
 
 .team-card__role--scrum-master {
-  background: rgba(194, 24, 91, 0.32);
+  background: rgba(194, 24, 91, 0.34);
   color: #ff9dc1;
 }
 
 .team-card__role--dev {
-  background: rgba(230, 81, 0, 0.3);
+  background: rgba(230, 81, 0, 0.32);
   color: #ffc09a;
 }
 
 .team-card__description {
   margin: auto 0 0;
-  padding-top: 14px;
+  padding-top: 12px;
   color: var(--text-secondary, #a7a7a7);
-  font-size: var(--font-size-sm, 0.875rem);
-  line-height: 1.6;
+  font-size: 0.84rem;
+  line-height: 1.5;
 }
 
 .roles-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   margin: 0;
   padding: 0;
@@ -228,21 +233,21 @@
 
 .roles-list dt {
   margin-bottom: 6px;
-  color: var(--text-primary, #fff);
-  font-weight: var(--font-weight-bold, 700);
+  color: var(--text-primary, #ffffff);
+  font-weight: 700;
 }
 
 .roles-list dd {
   margin: 0;
   color: var(--text-secondary, #a7a7a7);
-  font-size: var(--font-size-sm, 0.875rem);
-  line-height: 1.6;
+  font-size: 0.875rem;
+  line-height: 1.55;
 }
 
 .tech-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -252,20 +257,21 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 44px;
-  padding: 0 16px;
+  min-height: 40px;
+  padding: 0 15px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-pill, 500px);
   background: var(--about-surface);
-  color: var(--text-primary, #fff);
-  font-size: var(--font-size-sm, 0.875rem);
-  transition: transform var(--transition-base, 0.3s ease),
+  color: var(--text-primary, #ffffff);
+  font-size: 0.85rem;
+  transition:
+    transform var(--transition-base, 0.3s ease),
     background var(--transition-base, 0.3s ease);
 }
 
 .tech-badge svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   flex: none;
 }
 
@@ -276,8 +282,8 @@
 
 .workflow-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
   margin: 0;
   padding: 0;
   counter-reset: paso;
@@ -285,7 +291,7 @@
 }
 
 .workflow-step {
-  padding: 20px;
+  padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   background: var(--about-surface);
@@ -296,46 +302,47 @@
   content: counter(paso, decimal-leading-zero);
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  margin-bottom: 12px;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 10px;
   border-radius: 50%;
   background: var(--about-accent);
-  color: #fff;
-  font-weight: var(--font-weight-bold, 700);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 .workflow-step h3 {
   margin: 0 0 6px;
-  color: var(--text-primary, #fff);
-  font-size: 1rem;
-  line-height: 1.4;
+  color: var(--text-primary, #ffffff);
+  font-size: 0.96rem;
+  line-height: 1.35;
 }
 
 .workflow-step p {
   margin: 0;
   color: var(--text-secondary, #a7a7a7);
-  font-size: var(--font-size-sm, 0.875rem);
+  font-size: 0.84rem;
   line-height: 1.5;
 }
 
 .about-closing {
-  margin-top: clamp(40px, 7vw, 72px);
-  padding: clamp(24px, 5vw, 48px);
+  margin-top: clamp(32px, 5vw, 56px);
+  padding: clamp(22px, 4vw, 40px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  border-radius: 18px;
   background: linear-gradient(180deg, rgba(30, 20, 184, 0.25), rgba(24, 24, 24, 0.9));
   text-align: center;
 }
 
 .about-closing h2 {
-  margin: 0 0 10px;
-  color: var(--text-primary, #fff);
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin: 0 0 8px;
+  color: var(--text-primary, #ffffff);
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
 }
 
 .about-closing p {
-  margin: 0 0 24px;
+  margin: 0 0 20px;
   color: var(--text-secondary, #a7a7a7);
 }
 
@@ -343,7 +350,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .about-button,
@@ -352,18 +359,20 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 48px;
-  padding: 0 24px;
+  min-height: 44px;
+  padding: 0 22px;
   border-radius: var(--radius-pill, 500px);
-  font-weight: var(--font-weight-bold, 700);
+  font-size: 0.9rem;
+  font-weight: 700;
   text-decoration: none;
-  transition: transform var(--transition-base, 0.3s ease),
+  transition:
+    transform var(--transition-base, 0.3s ease),
     background var(--transition-base, 0.3s ease);
 }
 
 .about-button {
   background: var(--primary-hover, #1e14b8);
-  color: #fff;
+  color: #ffffff;
 }
 
 .about-button:hover {
@@ -373,7 +382,7 @@
 
 .about-link {
   border: 1px solid rgba(255, 255, 255, 0.28);
-  color: var(--text-primary, #fff);
+  color: var(--text-primary, #ffffff);
 }
 
 .about-link:hover {
@@ -381,50 +390,58 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-@media (max-width: 520px) {
+@media (max-width: 1024px) {
+  .team-grid,
+  .workflow-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .roles-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
   .about-page {
-    padding-inline: 16px;
+    padding: 0.75rem 0.25rem 2.5rem;
   }
 
   .about-hero {
-    border-radius: 18px;
+    border-radius: 16px;
+    padding: 24px 16px;
   }
 
-  .team-card {
-    padding: 20px;
-  }
-
-  .tech-list {
+  .team-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
-  .tech-badge {
-    padding-inline: 14px;
+  .team-card {
+    padding: 16px 12px;
+  }
+
+  .about-avatar {
+    width: 72px;
+    height: 72px;
+  }
+
+  .about-avatar__initials {
+    font-size: 1.35rem;
+  }
+
+  .team-card__name {
+    font-size: 0.9rem;
+  }
+
+  .team-card__description {
+    font-size: 0.78rem;
+  }
+
+  .workflow-list {
+    grid-template-columns: 1fr;
   }
 
   .about-closing__actions {
     flex-direction: column;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .about-page.is-reveal-ready [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .team-card,
-  .tech-badge,
-  .about-button,
-  .about-link {
-    transition: none;
-  }
-
-  .team-card:hover,
-  .tech-badge:hover,
-  .about-button:hover,
-  .about-link:hover {
-    transform: none;
   }
 }

@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Home, LibraryBig, Search } from 'lucide-react';
 import { Navbar } from '../components/navbar/navbar';
 import { Sidebar } from '../components/Sidebar/Sidebar';
 import { Player } from '../components/player/Player';
@@ -22,6 +23,7 @@ export function MainLayout() {
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [pathname]);
 
   return (
@@ -41,12 +43,14 @@ export function MainLayout() {
         <Sidebar />
       </aside>
 
-      <button
-        type="button"
-        className="layout-sidebar-overlay"
-        aria-label="Cerrar menú"
-        onClick={() => setSidebarOpen(false)}
-      />
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="layout-sidebar-overlay"
+          aria-label="Cerrar menú"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       <main className="layout-content" ref={contentRef}>
         <div className="layout-page">
@@ -60,17 +64,34 @@ export function MainLayout() {
       </main>
 
       <div
-        className="layout-player"
-        style={isPlayerFloating ? { height: 0, minHeight: 0, padding: 0, border: 'none' } : undefined}
+        className={`layout-player${isPlayerFloating ? ' layout-player--floating' : ''}`}
       >
         {user ? <Player /> : <GuestBanner />}
       </div>
 
-      <nav className="layout-bottom-nav">
-        {/* TODO: reemplazar por <NavInferior /> si no viene incluido en el ticket de Navbar */}
-        <span>Inicio</span>
-        <span>Buscar</span>
-        <span>Biblioteca</span>
+      <nav className="layout-bottom-nav" aria-label="Navegación móvil">
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => `layout-bottom-nav__item${isActive ? ' is-active' : ''}`}
+        >
+          <Home size={20} aria-hidden="true" />
+          <span>Inicio</span>
+        </NavLink>
+        <NavLink
+          to="/search"
+          className={({ isActive }) => `layout-bottom-nav__item${isActive ? ' is-active' : ''}`}
+        >
+          <Search size={20} aria-hidden="true" />
+          <span>Buscar</span>
+        </NavLink>
+        <NavLink
+          to="/biblioteca"
+          className={({ isActive }) => `layout-bottom-nav__item${isActive ? ' is-active' : ''}`}
+        >
+          <LibraryBig size={20} aria-hidden="true" />
+          <span>Biblioteca</span>
+        </NavLink>
       </nav>
     </div>
   );
