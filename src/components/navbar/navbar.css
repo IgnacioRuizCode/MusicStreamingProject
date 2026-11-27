@@ -187,13 +187,45 @@
 
 .navbar__actions .btn,
 .navbar__actions a[href="/login"],
+.navbar__actions a[href="/register"],
 .navbar__actions a[href="/registro"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px 22px;
-  border-radius: 9999px;
+  border-radius: 9999px !important;
   font-size: 0.9rem;
   font-weight: 700;
   white-space: nowrap;
-  transition: transform 0.15s ease, background-color 0.15s ease;
+  transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.navbar__actions a[href="/login"] {
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.navbar__actions a[href="/login"]:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: scale(1.03);
+}
+
+.navbar__actions .btn--primary,
+.navbar__actions a[href="/register"],
+.navbar__actions a[href="/registro"] {
+  background-color: #ffffff !important;
+  color: #09090d !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.navbar__actions .btn--primary:hover,
+.navbar__actions a[href="/register"]:hover,
+.navbar__actions a[href="/registro"]:hover {
+  background-color: #e5e7eb !important;
+  color: #09090d !important;
+  transform: scale(1.04);
 }
 
 .navbar__actions .btn:hover {

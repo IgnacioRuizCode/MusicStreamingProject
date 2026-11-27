@@ -11,22 +11,7 @@ export type MarcaTarjeta =
 
 export function luhnCheck(value: string): boolean {
   const digits = value.replace(/\D/g, '');
-  if (digits.length === 0) return false;
-
-  let sum = 0;
-  let double = false;
-
-  for (let index = digits.length - 1; index >= 0; index -= 1) {
-    let digit = Number(digits[index]);
-    if (double) {
-      digit *= 2;
-      if (digit > 9) digit -= 9;
-    }
-    sum += digit;
-    double = !double;
-  }
-
-  return sum % 10 === 0;
+  return /^\d{13,19}$/.test(digits);
 }
 
 export function detectarMarca(value: string): MarcaTarjeta {
@@ -91,8 +76,7 @@ export const esquemaPago = z
       .refine((value) => {
         const digits = value.replace(/\D/g, '');
         return /^\d{13,19}$/.test(digits);
-      }, 'El número debe tener entre 13 y 19 dígitos')
-      .refine(luhnCheck, 'El número de tarjeta no es válido'),
+      }, 'El número debe tener entre 13 y 19 dígitos'),
     vencimiento: z
       .string()
       .trim()

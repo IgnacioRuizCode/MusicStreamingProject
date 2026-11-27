@@ -535,14 +535,25 @@
   .player:not(.player--floating) {
     position: relative;
     grid-template-columns: 1fr auto;
-    min-height: 68px;
+    min-height: 64px;
+    margin: 4px 8px;
     padding: 0.5rem 0.85rem;
+    border-radius: 14px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 12% 50%, var(--player-ambient, rgba(99, 102, 241, 0.25)), transparent 55%),
+      rgba(22, 22, 30, 0.82);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.48);
     gap: 0.65rem;
   }
 
   .player:not(.player--floating) .player__cover {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
   }
 
   .player:not(.player--floating) .player__right,
@@ -559,14 +570,26 @@
 
   .player:not(.player--floating) .player__progress-row {
     position: absolute;
-    top: -2px;
+    bottom: 0;
     left: 0;
     right: 0;
     gap: 0;
   }
 
   .player:not(.player--floating) .player__range {
-    height: 3px;
+    height: 2px;
     border-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player,
+  .player__cover,
+  .player__play-btn,
+  .player__icon-btn,
+  .player__like-btn,
+  .player__eq i {
+    animation: none !important;
+    transition: none !important;
   }
 }

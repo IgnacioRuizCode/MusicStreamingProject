@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Music2 } from 'lucide-react';
+import { Music2, X } from 'lucide-react';
 import type { PlayableSong } from '../../context/PlayerContext';
 import './AuthPromptModal.css';
 
@@ -38,17 +38,35 @@ export function AuthPromptModal({ song, onClose }: AuthPromptModalProps) {
         aria-labelledby="auth-prompt-title"
         onClick={(event) => event.stopPropagation()}
       >
+        <button
+          type="button"
+          className="auth-prompt__close"
+          onClick={onClose}
+          aria-label="Cerrar"
+          title="Cerrar"
+        >
+          <X size={18} aria-hidden="true" />
+        </button>
+
         <div className="auth-prompt__cover">
           {song.cover ? (
             <img src={song.cover} alt={`Portada de ${song.title}`} />
           ) : (
-            <Music2 size={36} aria-hidden="true" />
+            <Music2 size={42} aria-hidden="true" />
           )}
         </div>
 
+        {song.title && (
+          <p className="auth-prompt__song-badge">{song.title}</p>
+        )}
+
         <h2 id="auth-prompt-title" className="auth-prompt__title">
-          Empieza a escuchar con una cuenta de Codify gratis
+          Empezá a escuchar con una cuenta gratis de Codify
         </h2>
+
+        <p className="auth-prompt__subtitle">
+          Creá tu cuenta en segundos para reproducir canciones completas, armar playlists y guardar tus favoritos.
+        </p>
 
         <div className="auth-prompt__actions">
           <Link
@@ -65,10 +83,6 @@ export function AuthPromptModal({ song, onClose }: AuthPromptModalProps) {
           </Link>
         </div>
       </div>
-
-      <button type="button" className="auth-prompt__close" onClick={onClose}>
-        Cerrar
-      </button>
     </div>
   );
 }

@@ -157,6 +157,7 @@ export function PaginaPlaylist() {
   const [refreshTick, setRefreshTick] = useState(0);
   const [songForPlaylist, setSongForPlaylist] = useState<Song | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const playlist = useMemo(() => {
     void refreshTick;
@@ -325,7 +326,24 @@ export function PaginaPlaylist() {
 
           <h1 className="playlist-title">{playlist.title}</h1>
 
-          <p className="playlist-description">{playlist.description}</p>
+          {playlist.description && (
+  <div className="playlist-description-wrap">
+    <p
+      className={`playlist-description${!descExpanded ? ' playlist-description--clamped' : ''}`}
+    >
+      {playlist.description}
+    </p>
+    {playlist.description.length > 110 && (
+      <button
+        type="button"
+        className="playlist-description-toggle"
+        onClick={() => setDescExpanded((prev) => !prev)}
+      >
+        {descExpanded ? 'Ver menos' : 'Ver más'}
+      </button>
+    )}
+  </div>
+)}
 
           <p className="playlist-details">
             <strong>{creatorName}</strong> · {canciones.length} canciones ·{' '}

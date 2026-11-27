@@ -2,43 +2,72 @@
   position: fixed;
   inset: 0;
   z-index: 2000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  display: grid;
+  place-items: center;
   padding: 1.5rem;
-  background: rgba(3, 3, 8, 0.76);
-  backdrop-filter: blur(10px);
+  background: rgba(5, 5, 10, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   box-sizing: border-box;
   animation: auth-prompt-fade 0.18s ease-out;
 }
 
 .auth-prompt__card {
+  position: relative;
   width: 100%;
-  max-width: 420px;
-  padding: 2rem 1.75rem 1.75rem;
-  border: 1px solid rgba(129, 140, 248, 0.28);
-  border-radius: 22px;
+  max-width: 410px;
+  padding: 2.25rem 1.85rem 1.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.24), transparent 42%),
-    linear-gradient(180deg, #191926 0%, #0d0d14 100%);
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7);
+    radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.22), transparent 55%),
+    rgba(22, 22, 30, 0.92);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.78);
   text-align: center;
-  animation: auth-prompt-rise 0.22s ease-out;
+  animation: auth-prompt-rise 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-prompt__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease, transform 0.15s ease;
+}
+
+.auth-prompt__close:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  transform: scale(1.06);
+}
+
+.auth-prompt__close:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
 }
 
 .auth-prompt__cover {
   display: grid;
   place-items: center;
-  width: 104px;
-  height: 104px;
-  margin: 0 auto 1.35rem;
+  width: 128px;
+  height: 128px;
+  margin: 0 auto 1.15rem;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 18px;
   background: linear-gradient(135deg, #1e1b4b, #312e81);
-  color: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.42);
+  color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .auth-prompt__cover img {
@@ -47,80 +76,101 @@
   object-fit: cover;
 }
 
+.auth-prompt__song-badge {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0 auto 0.65rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c7d2fe;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .auth-prompt__title {
-  margin: 0 auto 1.5rem;
-  max-width: 320px;
+  margin: 0 auto 0.6rem;
+  max-width: 330px;
   color: #ffffff;
   font-size: 1.35rem;
   font-weight: 800;
-  line-height: 1.35;
+  line-height: 1.28;
   letter-spacing: -0.02em;
+}
+
+.auth-prompt__subtitle {
+  margin: 0 auto 1.5rem;
+  max-width: 320px;
+  color: var(--text-secondary, #a7a7b4);
+  font-size: 0.86rem;
+  line-height: 1.45;
 }
 
 .auth-prompt__actions {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.9rem;
+  gap: 0.65rem;
 }
 
 .auth-prompt__primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
+  min-height: 46px;
   padding: 0.75rem 1.5rem;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-  color: #ffffff;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  color: #09090d;
+  font-size: 0.94rem;
   font-weight: 800;
   text-decoration: none;
-  box-shadow: 0 12px 28px rgba(59, 48, 204, 0.38);
-  transition: transform 0.18s ease, filter 0.18s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
 .auth-prompt__primary:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
+  background-color: #e5e7eb;
+  color: #09090d;
+  transform: scale(1.02);
+}
+
+.auth-prompt__primary:active {
+  transform: scale(0.97);
 }
 
 .auth-prompt__primary:focus-visible {
-  outline: 2px solid #c7d2fe;
+  outline: 2px solid #ffffff;
   outline-offset: 3px;
 }
 
 .auth-prompt__secondary {
-  color: #c7d2fe;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0.6rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
 .auth-prompt__secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.28);
   color: #ffffff;
 }
 
-.auth-prompt__close {
-  padding: 0.45rem 1rem;
-  border: none;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.62);
-  font-family: var(--font-family);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.18s ease;
-}
-
-.auth-prompt__close:hover {
-  color: #ffffff;
-}
-
-.auth-prompt__close:focus-visible {
-  outline: 2px solid #a5b4fc;
-  outline-offset: 2px;
-  border-radius: 6px;
+.auth-prompt__secondary:active {
+  transform: scale(0.97);
 }
 
 @keyframes auth-prompt-fade {
@@ -135,7 +185,7 @@
 @keyframes auth-prompt-rise {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
+    transform: translateY(14px) scale(0.97);
   }
   to {
     opacity: 1;
@@ -145,17 +195,26 @@
 
 @media (max-width: 480px) {
   .auth-prompt__card {
-    padding: 1.6rem 1.25rem 1.4rem;
+    padding: 2rem 1.35rem 1.5rem;
+  }
+
+  .auth-prompt__cover {
+    width: 112px;
+    height: 112px;
   }
 
   .auth-prompt__title {
-    font-size: 1.18rem;
+    font-size: 1.2rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .auth-prompt,
-  .auth-prompt__card {
+  .auth-prompt__card,
+  .auth-prompt__primary,
+  .auth-prompt__secondary,
+  .auth-prompt__close {
     animation: none;
+    transition: none;
   }
 }
