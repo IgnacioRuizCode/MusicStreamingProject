@@ -8,6 +8,7 @@ import { LayoutAdmin } from './layouts/AdminLayout';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './components/about-us/AboutPage';
 import { hydrateCatalogWithRealMedia } from './services/musicApiService';
+import { SplashScreen } from './components/SplashScreen';
 
 const SearchPage = lazy(() =>
   import('./pages/SearchPage').then((module) => ({ default: module.SearchPage })),
@@ -68,6 +69,7 @@ export default function App() {
 
   return (
     <>
+    <SplashScreen />
       <Routes>
         <Route element={<MainLayout />}>
           <Route index element={<HomePage />} />
