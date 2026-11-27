@@ -1,4 +1,4 @@
-import { type Artist } from '../types/types';
+import { type Artist } from '../../types/types';
 
 export const SEED_ARTISTS: Artist[] = [
   {

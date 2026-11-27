@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Pause, Play } from 'lucide-react';
 import { usePlayerContext } from '../context/PlayerContext';
@@ -16,6 +16,157 @@ function formatDuration(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+interface HomePlaylistCardProps {
+  playlist: Playlist;
+  isActive: boolean;
+  onOpen: (playlistId: string) => void;
+  onPlay: (playlist: Playlist) => void;
+}
+
+const HomePlaylistCard = memo(function HomePlaylistCard({
+  playlist,
+  isActive,
+  onOpen,
+  onPlay,
+}: HomePlaylistCardProps) {
+  return (
+    <article
+      className="home-card"
+      onClick={() => onOpen(playlist.id)}
+    >
+      <div className="home-card__media-wrap">
+        <div className="home-card__media">
+          <img
+            src={playlist.cover}
+            alt={playlist.title}
+            className="home-card__img"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <button
+          type="button"
+          className={`home-card__play-btn ${
+            isActive ? 'home-card__play-btn--active' : ''
+          }`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onPlay(playlist);
+          }}
+          aria-label={isActive ? `Pausar ${playlist.title}` : `Reproducir ${playlist.title}`}
+        >
+          {isActive ? <Pause size={18} /> : <Play size={18} />}
+        </button>
+      </div>
+
+      <h3 className="home-card__title">{playlist.title}</h3>
+      <p className="home-card__subtitle">{playlist.description}</p>
+    </article>
+  );
+});
+
+interface HomeArtistCardProps {
+  artist: Artist;
+  isActive: boolean;
+  onPlay: (artist: Artist) => void;
+}
+
+const HomeArtistCard = memo(function HomeArtistCard({
+  artist,
+  isActive,
+  onPlay,
+}: HomeArtistCardProps) {
+  return (
+    <article className="home-card" onClick={() => onPlay(artist)}>
+      <div className="home-card__media-wrap">
+        <div className="home-card__media home-card__media--round">
+          <img
+            src={artist.image}
+            alt={artist.name}
+            className="home-card__img"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <button
+          type="button"
+          className={`home-card__play-btn ${
+            isActive ? 'home-card__play-btn--active' : ''
+          }`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onPlay(artist);
+          }}
+          aria-label={`Reproducir canciones de ${artist.name}`}
+        >
+          {isActive ? <Pause size={18} /> : <Play size={18} />}
+        </button>
+      </div>
+
+      <h3 className="home-card__title">{artist.name}</h3>
+      <p className="home-card__subtitle">
+        {artist.monthlyListeners.toLocaleString('es-AR')} oyentes mensuales
+      </p>
+    </article>
+  );
+});
+
+interface HomeSongRowProps {
+  song: Song;
+  index: number;
+  artistName: string;
+  isCurrent: boolean;
+  isPlaying: boolean;
+  onPlay: (song: Song) => void;
+}
+
+const HomeSongRow = memo(function HomeSongRow({
+  song,
+  index,
+  artistName,
+  isCurrent,
+  isPlaying,
+  onPlay,
+}: HomeSongRowProps) {
+  return (
+    <div
+      className={`home-song-row${isCurrent ? ' home-song-row--active' : ''}`}
+      onClick={() => onPlay(song)}
+    >
+      <span className="home-song-row__index">{index + 1}</span>
+
+      <img
+        src={song.cover}
+        alt={song.title}
+        className="home-song-row__cover"
+        loading="lazy"
+        decoding="async"
+      />
+
+      <div className="home-song-row__info">
+        <div className="home-song-row__title">{song.title}</div>
+        <div className="home-song-row__artist">{artistName}</div>
+      </div>
+
+      <span className="home-song-row__duration">
+        {formatDuration(song.duration)}
+      </span>
+
+      <button
+        type="button"
+        className="home-song-row__btn"
+        aria-label={
+          isCurrent && isPlaying
+            ? `Pausar ${song.title}`
+            : `Reproducir ${song.title}`
+        }
+      >
+        {isCurrent && isPlaying ? <Pause size={15} /> : <Play size={15} />}
+      </button>
+    </div>
+  );
+});
+
 export function HomePage() {
   const navigate = useNavigate();
   const songs = useMemo(() => getAll('songs'), []);
@@ -30,41 +181,55 @@ export function HomePage() {
 
   const { currentSong, isPlaying, playSong, togglePlay } = usePlayerContext();
 
-  const handlePlaySong = (song: Song, customQueue: Song[] = songs) => {
-    if (currentSong?.id === song.id) {
-      togglePlay();
-      return;
-    }
-    playSong(song, customQueue);
-  };
+  const handleOpenPlaylist = useCallback(
+    (playlistId: string) => navigate(`/playlist/${playlistId}`),
+    [navigate],
+  );
 
-  const handlePlayPlaylist = (playlist: Playlist) => {
-    const playlistTracks = getPlaylistSongs(playlist.id);
-    if (playlistTracks.length === 0) return;
+  const handlePlaySong = useCallback(
+    (song: Song) => {
+      if (currentSong?.id === song.id) {
+        togglePlay();
+        return;
+      }
+      playSong(song, songs);
+    },
+    [currentSong?.id, playSong, songs, togglePlay],
+  );
 
-    const isPlaylistCurrent = playlistTracks.some(
-      (track) => track.id === currentSong?.id
-    );
-    if (isPlaylistCurrent && currentSong) {
-      togglePlay();
-      return;
-    }
-    playSong(playlistTracks[0], playlistTracks);
-  };
+  const handlePlayPlaylist = useCallback(
+    (playlist: Playlist) => {
+      const playlistTracks = getPlaylistSongs(playlist.id);
+      if (playlistTracks.length === 0) return;
 
-  const handlePlayArtist = (artist: Artist) => {
-    const artistTracks = getArtistSongs(artist.id);
-    if (artistTracks.length === 0) return;
+      const isPlaylistCurrent = playlistTracks.some(
+        (track) => track.id === currentSong?.id
+      );
+      if (isPlaylistCurrent && currentSong) {
+        togglePlay();
+        return;
+      }
+      playSong(playlistTracks[0], playlistTracks);
+    },
+    [currentSong, playSong, togglePlay],
+  );
 
-    const isArtistCurrent = artistTracks.some(
-      (track) => track.id === currentSong?.id
-    );
-    if (isArtistCurrent && currentSong) {
-      togglePlay();
-      return;
-    }
-    playSong(artistTracks[0], artistTracks);
-  };
+  const handlePlayArtist = useCallback(
+    (artist: Artist) => {
+      const artistTracks = getArtistSongs(artist.id);
+      if (artistTracks.length === 0) return;
+
+      const isArtistCurrent = artistTracks.some(
+        (track) => track.id === currentSong?.id
+      );
+      if (isArtistCurrent && currentSong) {
+        togglePlay();
+        return;
+      }
+      playSong(artistTracks[0], artistTracks);
+    },
+    [currentSong, playSong, togglePlay],
+  );
 
   return (
     <div className="home-page">
@@ -81,41 +246,13 @@ export function HomePage() {
               playlist.songIds.includes(currentSong.id);
 
             return (
-              <article
+              <HomePlaylistCard
                 key={playlist.id}
-                className="home-card"
-                onClick={() => navigate(`/playlist/${playlist.id}`)}
-              >
-                <div className="home-card__media-wrap">
-                  <div className="home-card__media">
-                    <img
-                      src={playlist.cover}
-                      alt={playlist.title}
-                      className="home-card__img"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    className={`home-card__play-btn ${
-                      isActivePlaylist ? 'home-card__play-btn--active' : ''
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePlayPlaylist(playlist);
-                    }}
-                    aria-label={
-                      isActivePlaylist
-                        ? `Pausar ${playlist.title}`
-                        : `Reproducir ${playlist.title}`
-                    }
-                  >
-                    {isActivePlaylist ? <Pause size={18} /> : <Play size={18} />}
-                  </button>
-                </div>
-
-                <h3 className="home-card__title">{playlist.title}</h3>
-                <p className="home-card__subtitle">{playlist.description}</p>
-              </article>
+                playlist={playlist}
+                isActive={isActivePlaylist}
+                onOpen={handleOpenPlaylist}
+                onPlay={handlePlayPlaylist}
+              />
             );
           })}
         </div>
@@ -132,36 +269,12 @@ export function HomePage() {
               isPlaying && currentSong?.artistId === artist.id;
 
             return (
-              <article
+              <HomeArtistCard
                 key={artist.id}
-                className="home-card"
-                onClick={() => handlePlayArtist(artist)}
-              >
-                <div className="home-card__media-wrap">
-                  <div className="home-card__media home-card__media--round">
-                    <img
-                      src={artist.image}
-                      alt={artist.name}
-                      className="home-card__img"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    className={`home-card__play-btn ${
-                      isActiveArtist ? 'home-card__play-btn--active' : ''
-                    }`}
-                    aria-label={`Reproducir canciones de ${artist.name}`}
-                  >
-                    {isActiveArtist ? <Pause size={18} /> : <Play size={18} />}
-                  </button>
-                </div>
-
-                <h3 className="home-card__title">{artist.name}</h3>
-                <p className="home-card__subtitle">
-                  {artist.monthlyListeners.toLocaleString('es-AR')} oyentes
-                  mensuales
-                </p>
-              </article>
+                artist={artist}
+                isActive={isActiveArtist}
+                onPlay={handlePlayArtist}
+              />
             );
           })}
         </div>
@@ -173,54 +286,17 @@ export function HomePage() {
         </div>
 
         <div className="home-songs">
-          {songs.map((song, index) => {
-            const isCurrent = currentSong?.id === song.id;
-            const artistName =
-              artistNameById.get(song.artistId) ?? 'Artista desconocido';
-
-            return (
-              <div
-                key={song.id}
-                className={`home-song-row ${
-                  isCurrent ? 'home-song-row--active' : ''
-                }`}
-                onClick={() => handlePlaySong(song)}
-              >
-                <span className="home-song-row__index">{index + 1}</span>
-
-                <img
-                  src={song.cover}
-                  alt={song.title}
-                  className="home-song-row__cover"
-                />
-
-                <div className="home-song-row__info">
-                  <div className="home-song-row__title">{song.title}</div>
-                  <div className="home-song-row__artist">{artistName}</div>
-                </div>
-
-                <span className="home-song-row__duration">
-                  {formatDuration(song.duration)}
-                </span>
-
-                <button
-                  type="button"
-                  className="home-song-row__btn"
-                  aria-label={
-                    isCurrent && isPlaying
-                      ? `Pausar ${song.title}`
-                      : `Reproducir ${song.title}`
-                  }
-                >
-                  {isCurrent && isPlaying ? (
-                    <Pause size={15} />
-                  ) : (
-                    <Play size={15} />
-                  )}
-                </button>
-              </div>
-            );
-          })}
+          {songs.map((song, index) => (
+            <HomeSongRow
+              key={song.id}
+              song={song}
+              index={index}
+              artistName={artistNameById.get(song.artistId) ?? 'Artista desconocido'}
+              isCurrent={currentSong?.id === song.id}
+              isPlaying={isPlaying}
+              onPlay={handlePlaySong}
+            />
+          ))}
         </div>
       </section>
     </div>

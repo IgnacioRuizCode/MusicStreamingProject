@@ -1,10 +1,10 @@
-import { type Song } from '../types/types';
+import { type Song } from '../../types/types';
 
-import midnightDrive from '../assets/audioplaylist/Midnight Drive.mp3';
-import lunaDePlata from '../assets/audioplaylist/La Garfield - Luna de Plata (Video Oficial).mp3';
-import basslineDrop from '../assets/audioplaylist/Payin Top Dolla - Bassline Drop.mp3';
-import deepBlue from '../assets/audioplaylist/Deep Blue - Giulio Cercato.mp3';
-import goldenHour from '../assets/audioplaylist/JVKE - golden hour (official music video).mp3';
+import midnightDrive from '../../assets/audioplaylist/Midnight Drive.mp3';
+import lunaDePlata from '../../assets/audioplaylist/La Garfield - Luna de Plata (Video Oficial).mp3';
+import basslineDrop from '../../assets/audioplaylist/Payin Top Dolla - Bassline Drop.mp3';
+import deepBlue from '../../assets/audioplaylist/Deep Blue - Giulio Cercato.mp3';
+import goldenHour from '../../assets/audioplaylist/JVKE - golden hour (official music video).mp3';
 
 export const SEED_SONGS: Song[] = [
   // The Weeknd (art-1)

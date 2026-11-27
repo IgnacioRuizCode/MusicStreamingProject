@@ -1,4 +1,4 @@
-import { type Playlist } from '../types/types';
+import { type Playlist } from '../../types/types';
 
 export const SEED_PLAYLISTS: Playlist[] = [
   {

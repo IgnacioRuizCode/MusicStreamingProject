@@ -1,5 +1,6 @@
+import { memo } from 'react'
 import { Link } from 'react-router-dom'
-import { CoverImage } from '../../componets/ui/CoverImage'
+import { CoverImage } from '../ui/CoverImage'
 
 interface LibraryItemProps {
   name: string
@@ -8,7 +9,12 @@ interface LibraryItemProps {
   path: string
 }
 
-export function LibraryItem({ name, image, type, path }: LibraryItemProps) {
+export const LibraryItem = memo(function LibraryItem({
+  name,
+  image,
+  type,
+  path,
+}: LibraryItemProps) {
   return (
     <li className="sidebar__item">
       <Link to={path} className="sidebar__item-link" title={`${name} — ${type}`}>
@@ -20,4 +26,4 @@ export function LibraryItem({ name, image, type, path }: LibraryItemProps) {
       </Link>
     </li>
   )
-}
+})

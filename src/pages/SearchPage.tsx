@@ -1,15 +1,93 @@
-import { useMemo, useEffect, useState } from 'react';
+import { memo, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Play, Music, Disc, User, Globe } from 'lucide-react';
 import { getAll, search } from '../services/storageServices';
 import { searchItunesSongs } from '../services/musicApiService';
 import { usePlayerContext } from '../context/PlayerContext';
-import type { Song } from '../types/types';
+import type { Artist, Song } from '../types/types';
 import './SearchPage.css';
+
+interface SearchCardProps {
+  to: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  round?: boolean;
+}
+
+const SearchCard = memo(function SearchCard({
+  to,
+  title,
+  subtitle,
+  image,
+  round = false,
+}: SearchCardProps) {
+  return (
+    <Link to={to} className={`search-card${round ? ' search-card--artist' : ''}`}>
+      <img
+        src={image}
+        alt={title}
+        className={`search-card__cover${round ? ' search-card__cover--round' : ''}`}
+        loading="lazy"
+        decoding="async"
+      />
+      <strong className="search-card__title">{title}</strong>
+      <span className="search-card__subtitle">{subtitle}</span>
+    </Link>
+  );
+});
+
+interface SearchSongRowProps {
+  song: Song;
+  queue: Song[];
+  artistName: string;
+  onPlay: (song: Song, queue: Song[]) => void;
+}
+
+const SearchSongRow = memo(function SearchSongRow({
+  song,
+  queue,
+  artistName,
+  onPlay,
+}: SearchSongRowProps) {
+  return (
+    <div className="search-song-row" onClick={() => onPlay(song, queue)}>
+      <div className="search-song-row__left">
+        <div className="search-song-row__cover-box">
+          <img
+            src={song.cover}
+            alt={song.title}
+            className="search-song-row__cover"
+            loading="lazy"
+            decoding="async"
+          />
+          <span className="search-song-row__play-overlay">
+            <Play size={16} fill="currentColor" />
+          </span>
+        </div>
+        <div className="search-song-row__meta">
+          <strong>{song.title}</strong>
+          <span>{artistName}</span>
+        </div>
+      </div>
+      <span className="search-song-row__duration">
+        {formatDuration(song.duration)}
+      </span>
+    </div>
+  );
+});
+
+function formatDuration(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
 
 export function SearchPage() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') ?? '';
+  const deferredQuery = useDeferredValue(query);
+  const trimmedQuery = deferredQuery.trim();
 
   const [onlineState, setOnlineState] = useState<{
     term: string;
@@ -20,9 +98,12 @@ export function SearchPage() {
 
   const artists = useMemo(() => getAll('artists'), []);
   const allPlaylists = useMemo(() => getAll('playlists'), []);
-  const results = useMemo(() => search(query), [query]);
+  const artistNameById = useMemo(
+    () => new Map<string, string>(artists.map((artist: Artist) => [artist.id, artist.name])),
+    [artists],
+  );
+  const results = useMemo(() => search(deferredQuery), [deferredQuery]);
 
-  const trimmedQuery = query.trim();
   const isSearchingOnline =
     trimmedQuery.length > 0 && onlineState.term !== trimmedQuery;
   const onlineSongs =
@@ -48,13 +129,7 @@ export function SearchPage() {
   }, [trimmedQuery]);
 
   const getArtistName = (artistId: string) =>
-    artists.find((a) => a.id === artistId)?.name ?? artistId;
-
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+    artistNameById.get(artistId) ?? artistId;
 
   const hasQuery = trimmedQuery.length > 0;
   const noResults =
@@ -72,21 +147,13 @@ export function SearchPage() {
           <h2 className="search-page__section-title">Explorar playlists</h2>
           <div className="search-page__grid">
             {allPlaylists.map((playlist) => (
-              <Link
+              <SearchCard
                 key={playlist.id}
                 to={`/playlist/${playlist.id}`}
-                className="search-card"
-              >
-                <img
-                  src={playlist.cover}
-                  alt={playlist.title}
-                  className="search-card__cover"
-                />
-                <strong className="search-card__title">{playlist.title}</strong>
-                <span className="search-card__subtitle">
-                  {playlist.description}
-                </span>
-              </Link>
+                title={playlist.title}
+                subtitle={playlist.description}
+                image={playlist.cover}
+              />
             ))}
           </div>
         </section>
@@ -104,31 +171,13 @@ export function SearchPage() {
               </h2>
               <div className="search-songs-list">
                 {results.songs.map((song) => (
-                  <div
+                  <SearchSongRow
                     key={song.id}
-                    className="search-song-row"
-                    onClick={() => playSong(song, results.songs)}
-                  >
-                    <div className="search-song-row__left">
-                      <div className="search-song-row__cover-box">
-                        <img
-                          src={song.cover}
-                          alt={song.title}
-                          className="search-song-row__cover"
-                        />
-                        <span className="search-song-row__play-overlay">
-                          <Play size={16} fill="currentColor" />
-                        </span>
-                      </div>
-                      <div className="search-song-row__meta">
-                        <strong>{song.title}</strong>
-                        <span>{getArtistName(song.artistId)}</span>
-                      </div>
-                    </div>
-                    <span className="search-song-row__duration">
-                      {formatDuration(song.duration)}
-                    </span>
-                  </div>
+                    song={song}
+                    queue={results.songs}
+                    artistName={getArtistName(song.artistId)}
+                    onPlay={playSong}
+                  />
                 ))}
               </div>
             </section>
@@ -144,31 +193,13 @@ export function SearchPage() {
               ) : (
                 <div className="search-songs-list">
                   {onlineSongs.map((song) => (
-                    <div
+                    <SearchSongRow
                       key={song.id}
-                      className="search-song-row"
-                      onClick={() => playSong(song, onlineSongs)}
-                    >
-                      <div className="search-song-row__left">
-                        <div className="search-song-row__cover-box">
-                          <img
-                            src={song.cover}
-                            alt={song.title}
-                            className="search-song-row__cover"
-                          />
-                          <span className="search-song-row__play-overlay">
-                            <Play size={16} fill="currentColor" />
-                          </span>
-                        </div>
-                        <div className="search-song-row__meta">
-                          <strong>{song.title}</strong>
-                          <span>{song.artistId}</span>
-                        </div>
-                      </div>
-                      <span className="search-song-row__duration">
-                        {formatDuration(song.duration)}
-                      </span>
-                    </div>
+                      song={song}
+                      queue={onlineSongs}
+                      artistName={song.artistId}
+                      onPlay={playSong}
+                    />
                   ))}
                 </div>
               )}
@@ -182,19 +213,14 @@ export function SearchPage() {
               </h2>
               <div className="search-page__grid">
                 {results.artists.map((artist) => (
-                  <Link
+                  <SearchCard
                     key={artist.id}
                     to={`/artista/${artist.id}`}
-                    className="search-card search-card--artist"
-                  >
-                    <img
-                      src={artist.image}
-                      alt={artist.name}
-                      className="search-card__cover search-card__cover--round"
-                    />
-                    <strong className="search-card__title">{artist.name}</strong>
-                    <span className="search-card__subtitle">Artista</span>
-                  </Link>
+                    title={artist.name}
+                    subtitle="Artista"
+                    image={artist.image}
+                    round
+                  />
                 ))}
               </div>
             </section>
@@ -207,23 +233,13 @@ export function SearchPage() {
               </h2>
               <div className="search-page__grid">
                 {results.playlists.map((playlist) => (
-                  <Link
+                  <SearchCard
                     key={playlist.id}
                     to={`/playlist/${playlist.id}`}
-                    className="search-card"
-                  >
-                    <img
-                      src={playlist.cover}
-                      alt={playlist.title}
-                      className="search-card__cover"
-                    />
-                    <strong className="search-card__title">
-                      {playlist.title}
-                    </strong>
-                    <span className="search-card__subtitle">
-                      {playlist.description}
-                    </span>
-                  </Link>
+                    title={playlist.title}
+                    subtitle={playlist.description}
+                    image={playlist.cover}
+                  />
                 ))}
               </div>
             </section>
