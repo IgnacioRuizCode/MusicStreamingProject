@@ -1,6 +1,6 @@
 import { useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { FaPlay } from 'react-icons/fa';
+import { Disc3, Play } from 'lucide-react';
 import './CardPlaylist.css';
 
 export interface CardPlaylistProps {
@@ -8,6 +8,7 @@ export interface CardPlaylistProps {
   title: string;
   description?: string;
   image?: string;
+  songCount?: number;
   fallbackImage?: string;
   onPlay?: (id: string) => void;
 }
@@ -20,16 +21,13 @@ export function CardPlaylist({
   title,
   description,
   image,
+  songCount,
   fallbackImage = DEFAULT_PLAYLIST_IMAGE,
   onPlay,
 }: CardPlaylistProps) {
   const [hasError, setHasError] = useState(false);
 
   const resolvedImage = !hasError && image ? image : fallbackImage;
-
-  const handleImageError = () => {
-    setHasError(true);
-  };
 
   const handlePlayClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -41,38 +39,49 @@ export function CardPlaylist({
     <Link
       to={`/playlist/${id}`}
       className="playlist-card"
-      aria-label={`Open playlist ${title}`}
+      aria-label={`Abrir playlist ${title}`}
     >
-      <div className="playlist-card__media">
-        <img
-          src={resolvedImage}
-          alt={title}
-          className="playlist-card__image"
-          loading="lazy"
-          decoding="async"
-          onError={handleImageError}
-        />
+      <div className="playlist-card__inner">
+        <div className="playlist-card__face playlist-card__front">
+          <div className="playlist-card__media">
+            <img
+              src={resolvedImage}
+              alt={title}
+              className="playlist-card__image"
+              loading="lazy"
+              decoding="async"
+              onError={() => setHasError(true)}
+            />
+          </div>
+          <h3 className="playlist-card__title" title={title}>
+            {title}
+          </h3>
+        </div>
 
-        <button
-          type="button"
-          className="playlist-card__play-button"
-          aria-label={`Play ${title}`}
-          onClick={handlePlayClick}
-        >
-          <FaPlay className="playlist-card__play-icon" aria-hidden="true" />
-        </button>
-      </div>
+        <div className="playlist-card__face playlist-card__back">
+          <div className="playlist-card__back-top">
+            <span className="playlist-card__badge">
+              <Disc3 size={13} aria-hidden="true" />
+              {typeof songCount === 'number' ? `Playlist • ${songCount} temas` : 'Playlist'}
+            </span>
+            <h3 className="playlist-card__back-title">{title}</h3>
+            <p className="playlist-card__description">
+              {description || 'Selección curada para escuchar sin límites.'}
+            </p>
+          </div>
 
-      <div className="playlist-card__info">
-        <h3 className="playlist-card__title" title={title}>
-          {title}
-        </h3>
-
-        {description && (
-          <p className="playlist-card__description" title={description}>
-            {description}
-          </p>
-        )}
+          {onPlay && (
+            <button
+              type="button"
+              className="playlist-card__play-button"
+              aria-label={`Reproducir ${title}`}
+              onClick={handlePlayClick}
+            >
+              <Play size={16} fill="currentColor" aria-hidden="true" />
+              <span>Reproducir</span>
+            </button>
+          )}
+        </div>
       </div>
     </Link>
   );

@@ -65,7 +65,7 @@ export function Sidebar() {
           id: playlist.id,
           name: playlist.title,
           image: playlist.cover,
-          type: `Playlist • ${creator?.username ?? 'Spotify'}`,
+          type: `Playlist • ${creator?.username ?? 'Codify'}`,
           path: `/playlist/${playlist.id}`,
         };
       });
@@ -104,23 +104,10 @@ export function Sidebar() {
 
       <section className="sidebar__block sidebar__block--library" aria-labelledby="sidebar-library-title">
         <div className="sidebar__library-header">
-          <div className="sidebar__library-header">
-          <Link to="/biblioteca" className="sidebar__library-title">
+          <Link id="sidebar-library-title" to="/biblioteca" className="sidebar__library-title">
             <LibraryBig size={22} aria-hidden="true" />
             <span className="sidebar__label">Tu biblioteca</span>
           </Link>
-          {user && (
-            <button
-              type="button"
-              className="sidebar__add"
-              aria-label="Crear playlist"
-              title="Crear playlist"
-              onClick={() => setCrearModalOpen(true)}
-            >
-              <Plus size={22} aria-hidden="true" />
-            </button>
-          )}
-        </div>
           {user && (
             <button
               type="button"
@@ -178,14 +165,15 @@ export function Sidebar() {
           </ul>
         )}
       </section>
+
       {user && (
-  <CrearPlaylistModal
-    abierto={crearModalOpen}
-    userId={user.id}
-    onClose={() => setCrearModalOpen(false)}
-    onCreated={() => setStorageVersion((v) => v + 1)}
-  />
-)}
+        <CrearPlaylistModal
+          abierto={crearModalOpen}
+          userId={user.id}
+          onClose={() => setCrearModalOpen(false)}
+          onCreated={() => setStorageVersion((v) => v + 1)}
+        />
+      )}
     </div>
   );
 }

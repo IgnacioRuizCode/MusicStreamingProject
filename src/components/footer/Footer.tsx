@@ -17,7 +17,7 @@ const FOOTER_COLUMNS: FooterColumn[] = [
   {
     title: 'Compañía',
     links: [
-      { label: 'Acerca de', to: '/about' },
+      { label: 'Acerca de', to: '/nosotros' },
       { label: 'Empleo', to: '/careers' },
       { label: 'Prensa', to: '/press' },
     ],
@@ -33,8 +33,8 @@ const FOOTER_COLUMNS: FooterColumn[] = [
   {
     title: 'Enlaces útiles',
     links: [
-      { label: 'Ayuda', to: '/help' },
-      { label: 'Planes', to: '/plans' },
+      { label: 'Ayuda', to: '/ayuda' },
+      { label: 'Planes', to: '/planes' },
       { label: 'Contacto', to: '/contact' },
     ],
   },
@@ -114,7 +114,7 @@ export function Footer() {
         </nav>
 
         <p className="footer__copyright">
-          &copy; {currentYear} Music Streaming. Todos los derechos reservados.
+          &copy; {currentYear} Codify. Todos los derechos reservados.
         </p>
       </div>
     </footer>
