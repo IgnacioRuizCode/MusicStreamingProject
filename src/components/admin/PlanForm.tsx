@@ -96,7 +96,11 @@ export function PlanForm({
       <div>
         <div className="formulario-plan__beneficios-header">
           <label>Beneficios</label>
-          <button type="button" onClick={() => append({ value: '' })}>
+          <button
+            type="button"
+            className="btn btn--secondary btn--sm"
+            onClick={() => append({ value: '' })}
+          >
             + Agregar beneficio
           </button>
         </div>
@@ -118,7 +122,11 @@ export function PlanForm({
                 )}
               </div>
               {fields.length > 1 && (
-                <button type="button" onClick={() => remove(index)}>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--sm"
+                  onClick={() => remove(index)}
+                >
                   Quitar
                 </button>
               )}
@@ -133,10 +141,10 @@ export function PlanForm({
       </div>
 
       <div className="formulario-plan__acciones">
-        <button type="button" onClick={onCancelar}>
+        <button type="button" className="btn btn--secondary" onClick={onCancelar}>
           Cancelar
         </button>
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" className="btn btn--primary" disabled={isSubmitting}>
           {valoresIniciales ? 'Guardar cambios' : 'Crear plan'}
         </button>
       </div>

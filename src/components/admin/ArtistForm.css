@@ -1,0 +1,9 @@
+.admin-form__preview .admin-thumb {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 480px) {
+  .admin-form__preview {
+    align-items: flex-start;
+  }
+}

@@ -24,8 +24,9 @@ export function AdminTab<T extends { id: string }>({
 }: TablaAdminProps<T>) {
   if (datos.length === 0) {
     return (
-      <div className="tabla-vacia">
-        <p>{mensajeVacio}</p>
+      <div className="admin-empty">
+        <p className="admin-empty__title">Sin resultados</p>
+        <p className="admin-empty__text">{mensajeVacio}</p>
         {accionVacio}
       </div>
     );

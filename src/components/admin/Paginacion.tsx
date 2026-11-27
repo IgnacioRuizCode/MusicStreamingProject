@@ -12,24 +12,26 @@ export function Paginacion({
   if (totalPaginas <= 1) return null;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+    <nav className="admin-pagination" aria-label="Paginación">
       <button
         type="button"
+        className="btn btn--secondary btn--sm"
         disabled={paginaActual <= 1}
         onClick={() => onCambiarPagina(paginaActual - 1)}
       >
         Anterior
       </button>
-      <span>
+      <span className="admin-pagination__label">
         Página {paginaActual} de {totalPaginas}
       </span>
       <button
         type="button"
+        className="btn btn--secondary btn--sm"
         disabled={paginaActual >= totalPaginas}
         onClick={() => onCambiarPagina(paginaActual + 1)}
       >
         Siguiente
       </button>
-    </div>
+    </nav>
   );
 }
