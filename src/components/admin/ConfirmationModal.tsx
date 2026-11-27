@@ -1,3 +1,5 @@
+import './ConfirmationModal.css';
+
 interface ModalConfirmacionProps {
   abierto: boolean;
   titulo: string;
@@ -21,40 +23,27 @@ export function ConfirmationModal({
     <div
       role="dialog"
       aria-modal="true"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-        zIndex: 1000,
-      }}
+      className="confirm-modal__backdrop"
+      onClick={onCancelar}
     >
       <div
-        style={{
-          width: '100%',
-          maxWidth: '420px',
-          padding: '1.5rem',
-          borderRadius: '12px',
-          backgroundColor: 'var(--bg-surface, #11111a)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          color: 'var(--text-primary, #fff)',
-        }}
+        className="confirm-modal__dialog"
+        onClick={(e) => e.stopPropagation()}
       >
-        <h3 style={{ marginTop: 0 }}>{titulo}</h3>
-        <p style={{ color: 'var(--text-secondary, #a1a1aa)', marginBottom: '1.5rem' }}>
-          {mensaje}
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-          <button type="button" onClick={onCancelar}>
+        <h3 className="confirm-modal__title">{titulo}</h3>
+        <p className="confirm-modal__message">{mensaje}</p>
+        <div className="confirm-modal__actions">
+          <button
+            type="button"
+            className="btn btn--secondary"
+            onClick={onCancelar}
+          >
             Cancelar
           </button>
           <button
             type="button"
+            className="btn btn--danger"
             onClick={onConfirmar}
-            style={{ backgroundColor: '#dc2626', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer' }}
           >
             {textoConfirmar}
           </button>

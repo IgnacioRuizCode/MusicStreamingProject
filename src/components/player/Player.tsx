@@ -366,22 +366,22 @@ export function Player() {
                 </span>
               )}
             </div>
-            <p className="player__artist">
+            <div className="player__artist-wrap">
               {currentSong ? (
-              artistExists ? (
-                <Link
-                  to={`/artista/${currentSong.artistId}`}
-                  className="player__artist player__artist--link"
-                >
-                  {artistName}
-                </Link>
+                artistExists ? (
+                  <Link
+                    to={`/artista/${currentSong.artistId}`}
+                    className="player__artist player__artist--link"
+                  >
+                    {artistName}
+                  </Link>
+                ) : (
+                  <p className="player__artist">{artistName}</p>
+                )
               ) : (
-                <p className="player__artist">{artistName}</p>
-              )
-            ) : (
-              <p className="player__artist">Elegí una canción o playlist para empezar</p>
-            )}
-            </p>
+                <p className="player__artist">Elegí una canción o playlist para empezar</p>
+              )}
+            </div>
           </div>
 
           {currentSong && (

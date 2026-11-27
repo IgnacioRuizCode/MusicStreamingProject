@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Home, LibraryBig, Plus, Search } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { CrearPlaylistModal } from '../CrearPlaylistModal';
 import {
   getAll,
   getById,
@@ -40,12 +41,12 @@ export function Sidebar() {
   const { pathname } = useLocation();
   const [filter, setFilter] = useState<LibraryFilter>('playlists');
   const [storageVersion, setStorageVersion] = useState(0);
+  const [crearModalOpen, setCrearModalOpen] = useState(false);
 
   useEffect(() => {
     initializeData();
     const handleStorage = () => setStorageVersion((value) => value + 1);
     window.addEventListener('storage', handleStorage);
-    // Refresca una vez tras hidratar portadas de iTunes
     const timer = window.setTimeout(handleStorage, 1500);
     return () => {
       window.removeEventListener('storage', handleStorage);
@@ -103,17 +104,30 @@ export function Sidebar() {
 
       <section className="sidebar__block sidebar__block--library" aria-labelledby="sidebar-library-title">
         <div className="sidebar__library-header">
-          <h2 id="sidebar-library-title" className="sidebar__library-title">
+          <div className="sidebar__library-header">
+          <Link to="/biblioteca" className="sidebar__library-title">
             <LibraryBig size={22} aria-hidden="true" />
             <span className="sidebar__label">Tu biblioteca</span>
-          </h2>
+          </Link>
           {user && (
             <button
               type="button"
               className="sidebar__add"
               aria-label="Crear playlist"
               title="Crear playlist"
-              onClick={() => {}}
+              onClick={() => setCrearModalOpen(true)}
+            >
+              <Plus size={22} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+          {user && (
+            <button
+              type="button"
+              className="sidebar__add"
+              aria-label="Crear playlist"
+              title="Crear playlist"
+              onClick={() => setCrearModalOpen(true)}
             >
               <Plus size={22} aria-hidden="true" />
             </button>
@@ -164,6 +178,14 @@ export function Sidebar() {
           </ul>
         )}
       </section>
+      {user && (
+  <CrearPlaylistModal
+    abierto={crearModalOpen}
+    userId={user.id}
+    onClose={() => setCrearModalOpen(false)}
+    onCreated={() => setStorageVersion((v) => v + 1)}
+  />
+)}
     </div>
   );
 }

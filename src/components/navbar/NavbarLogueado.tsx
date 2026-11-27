@@ -30,6 +30,9 @@ export function NavbarLogueado({ query, onQueryChange }: NavbarLogueadoProps) {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+ const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null)
+const showAvatarImg = Boolean(user?.avatar && failedAvatarUrl !== user.avatar)
+
   const closeMenu = () => setMenuOpen(false)
 
   return (
@@ -76,7 +79,16 @@ export function NavbarLogueado({ query, onQueryChange }: NavbarLogueadoProps) {
           aria-expanded={menuOpen}
         >
           <span className="user-menu__avatar" aria-hidden="true">
-            {user?.username?.charAt(0).toUpperCase() ?? '?'}
+            {showAvatarImg ? (
+              <img
+                src={user!.avatar}
+                alt=""
+                className="user-menu__avatar-img"
+                onError={() => setFailedAvatarUrl(user?.avatar ?? null)}
+              />
+            ) : (
+              user?.username?.charAt(0).toUpperCase() ?? '?'
+            )}
           </span>
           <span className="user-menu__name">{user?.username}</span>
           <ChevronDown size={16} aria-hidden="true" />
