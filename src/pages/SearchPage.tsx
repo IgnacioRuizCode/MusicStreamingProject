@@ -24,13 +24,18 @@ const SearchCard = memo(function SearchCard({
 }: SearchCardProps) {
   return (
     <Link to={to} className={`search-card${round ? ' search-card--artist' : ''}`}>
-      <img
-        src={image}
-        alt={title}
-        className={`search-card__cover${round ? ' search-card__cover--round' : ''}`}
-        loading="lazy"
-        decoding="async"
-      />
+      <div className={`search-card__cover-wrap${round ? ' search-card__cover-wrap--round' : ''}`}>
+        <img
+          src={image}
+          alt={title}
+          className={`search-card__cover${round ? ' search-card__cover--round' : ''}`}
+          loading="lazy"
+          decoding="async"
+        />
+        <span className="search-card__play-badge" aria-hidden="true">
+          <Play size={18} fill="currentColor" />
+        </span>
+      </div>
       <strong className="search-card__title">{title}</strong>
       <span className="search-card__subtitle">{subtitle}</span>
     </Link>

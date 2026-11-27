@@ -180,32 +180,32 @@
   height: 50px;
   margin-top: 0.4rem;
   border: 0;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-  color: #ffffff;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #09090d;
   font-size: 1rem;
   font-weight: 700;
-  box-shadow: 0 12px 30px rgba(59, 48, 204, 0.35);
+  letter-spacing: -0.01em;
+  box-shadow: 0 10px 26px rgba(255, 255, 255, 0.16);
   cursor: pointer;
   transition:
-    transform 0.18s ease,
+    transform 0.16s ease,
     box-shadow 0.18s ease,
-    filter 0.18s ease;
+    background-color 0.16s ease;
 }
 
 .auth-form__submit:hover:not(:disabled) {
-  filter: brightness(1.08);
+  background-color: #f3f4f6;
   transform: translateY(-1px);
-  box-shadow: 0 16px 36px rgba(59, 48, 204, 0.45);
+  box-shadow: 0 14px 32px rgba(255, 255, 255, 0.24);
 }
 
 .auth-form__submit:active:not(:disabled) {
-  transform: translateY(0);
-  filter: brightness(0.96);
+  transform: scale(0.97);
 }
 
 .auth-form__submit:focus-visible {
-  outline: 2px solid #a5b4fc;
+  outline: 2px solid #ffffff;
   outline-offset: 3px;
 }
 
