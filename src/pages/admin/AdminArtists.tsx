@@ -3,6 +3,9 @@ import { toast } from 'sonner';
 import { AdminTab, type ColumnaTabla } from '../../components/admin/AdminTab';
 import { Paginacion } from '../../components/admin/Paginacion';
 import { ConfirmationModal } from '../../components/admin/ConfirmationModal';
+import { AdminModal } from '../../components/admin/AdminModal';
+import { AdminSearch } from '../../components/admin/AdminSearch';
+import { ImagePreview } from '../../components/admin/ImagePreview';
 import { ArtistForm } from '../../components/admin/ArtistForm';
 import { useDebounce } from '../../hooks/useDebounce';
 import type { ArtistFormData } from '../../schemas/artistSchema';
@@ -21,7 +24,6 @@ export function AdminArtists() {
   const [artistas, setArtistas] = useState<Artist[]>(() => getAll('artists'));
   const [busqueda, setBusqueda] = useState('');
   const [pagina, setPagina] = useState(1);
-
   const [modalFormAbierto, setModalFormAbierto] = useState(false);
   const [artistaEditando, setArtistaEditando] = useState<Artist | null>(null);
   const [artistaAEliminar, setArtistaAEliminar] = useState<Artist | null>(null);
@@ -31,7 +33,7 @@ export function AdminArtists() {
   const filtrados = useMemo(() => {
     const q = busquedaDebounced.trim().toLowerCase();
     if (!q) return artistas;
-    return artistas.filter((a) => a.name.toLowerCase().includes(q));
+    return artistas.filter((artista) => artista.name.toLowerCase().includes(q));
   }, [artistas, busquedaDebounced]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtrados.length / FILAS_POR_PAGINA));
@@ -53,18 +55,22 @@ export function AdminArtists() {
     setModalFormAbierto(true);
   };
 
+  const cerrarFormulario = () => {
+    setModalFormAbierto(false);
+    setArtistaEditando(null);
+  };
+
   const handleGuardar = (data: ArtistFormData) => {
     try {
       if (artistaEditando) {
-  update('artists', artistaEditando.id, data);
-  toast.success('Artista actualizado correctamente');
-} else {
-  add('artists', { ...data, songIds: [] });
-  toast.success('Artista creado correctamente');
-}
+        update('artists', artistaEditando.id, data);
+        toast.success('Artista actualizado correctamente');
+      } else {
+        add('artists', { ...data, songIds: [] });
+        toast.success('Artista creado correctamente');
+      }
       refrescar();
-      setModalFormAbierto(false);
-      setArtistaEditando(null);
+      cerrarFormulario();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al guardar el artista');
     }
@@ -95,61 +101,90 @@ export function AdminArtists() {
     {
       key: 'image',
       header: 'Imagen',
-      render: (a) => (
-        <img
-          src={a.image}
-          alt={a.name}
-          style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
-        />
+      render: (artista) => (
+        <ImagePreview src={artista.image} alt={artista.name} redonda />
       ),
     },
-    { key: 'name', header: 'Nombre', render: (a) => a.name },
+    {
+      key: 'name',
+      header: 'Nombre',
+      render: (artista) => <strong>{artista.name}</strong>,
+    },
     {
       key: 'monthlyListeners',
       header: 'Oyentes mensuales',
-      render: (a) => a.monthlyListeners.toLocaleString('es-AR'),
+      render: (artista) => artista.monthlyListeners.toLocaleString('es-AR'),
+    },
+    {
+      key: 'songs',
+      header: 'Canciones',
+      render: (artista) => (
+        <span className="admin-badge">{artista.songIds.length}</span>
+      ),
     },
   ];
 
   return (
-    <section>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        <h1 style={{ margin: 0 }}>Artistas</h1>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <input
-            type="search"
-            placeholder="Buscar artista..."
-            value={busqueda}
-            onChange={(e) => {
-              setBusqueda(e.target.value);
-              setPagina(1);
-            }}
-          />
-          <button type="button" onClick={abrirCrear}>
+    <section className="admin-page">
+      <header className="admin-page__header">
+        <div>
+          <h1 className="admin-page__title">Artistas</h1>
+          <p className="admin-page__subtitle">
+            Gestioná los artistas del catálogo y sus canciones asociadas.
+          </p>
+        </div>
+        <div className="admin-page__actions">
+          <button type="button" className="btn btn--primary" onClick={abrirCrear}>
             + Nuevo artista
           </button>
         </div>
+      </header>
+
+      <div className="admin-toolbar">
+        <div className="admin-toolbar__group">
+          <AdminSearch
+            value={busqueda}
+            onChange={(value) => {
+              setBusqueda(value);
+              setPagina(1);
+            }}
+            placeholder="Buscar artista..."
+          />
+        </div>
+        <span className="admin-count">
+          {filtrados.length} de {artistas.length} artistas
+        </span>
       </div>
 
       <AdminTab
         columnas={columnas}
         datos={paginados}
         mensajeVacio={
-          busqueda ? 'No se encontraron artistas con esa búsqueda.' : 'Todavía no hay artistas cargados.'
+          busqueda
+            ? 'No se encontraron artistas con esa búsqueda.'
+            : 'Todavía no hay artistas cargados.'
         }
         accionVacio={
           !busqueda && (
-            <button type="button" onClick={abrirCrear}>
+            <button type="button" className="btn btn--primary" onClick={abrirCrear}>
               Crear primer artista
             </button>
           )
         }
         renderAcciones={(artista) => (
-          <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
-            <button type="button" onClick={() => abrirEditar(artista)}>
+          <div className="admin-actions">
+            <button
+              type="button"
+              className="btn btn--secondary btn--sm"
+              onClick={() => abrirEditar(artista)}
+            >
               Editar
             </button>
-            <button type="button" onClick={() => setArtistaAEliminar(artista)}>
+            <button
+              type="button"
+              className="btn btn--danger btn--sm"
+              onClick={() => setArtistaAEliminar(artista)}
+            >
               Eliminar
             </button>
           </div>
@@ -163,43 +198,17 @@ export function AdminArtists() {
       />
 
       {modalFormAbierto && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            zIndex: 1000,
-          }}
+        <AdminModal
+          titulo={artistaEditando ? 'Editar artista' : 'Nuevo artista'}
+          onCerrar={cerrarFormulario}
+          tamano="md"
         >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '460px',
-              padding: '1.5rem',
-              borderRadius: '12px',
-              backgroundColor: 'var(--bg-surface, #11111a)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            <h2 style={{ marginTop: 0 }}>
-              {artistaEditando ? 'Editar artista' : 'Nuevo artista'}
-            </h2>
-            <ArtistForm
-              valoresIniciales={artistaEditando}
-              onGuardar={handleGuardar}
-              onCancelar={() => {
-                setModalFormAbierto(false);
-                setArtistaEditando(null);
-              }}
-            />
-          </div>
-        </div>
+          <ArtistForm
+            valoresIniciales={artistaEditando}
+            onGuardar={handleGuardar}
+            onCancelar={cerrarFormulario}
+          />
+        </AdminModal>
       )}
 
       <ConfirmationModal
