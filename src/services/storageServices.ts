@@ -3,11 +3,12 @@ import {
  type Artist,
  type CollectionMap,
  type CollectionName,
- type Playlist,
- type SessionUser,
- type Song,
- type User,
- type Role,
+  type Playlist,
+  type Plan,
+  type SessionUser,
+  type Song,
+  type User,
+  type Role,
 } from '../types/types';
 import { SEED_DATA } from '../data/seed';
 
@@ -45,6 +46,56 @@ export function remove(key: StorageKey): void {
 }
 
 
+function isPlanCollection(value: unknown): value is Plan[] {
+  if (!Array.isArray(value)) return false;
+
+  return value.every((item) => {
+    if (!item || typeof item !== 'object') return false;
+    const plan = item as Partial<Plan>;
+    return (
+      typeof plan.id === 'string' &&
+      typeof plan.nombre === 'string' &&
+      typeof plan.precio === 'number' &&
+      Array.isArray(plan.beneficios) &&
+      typeof plan.destacado === 'boolean'
+    );
+  });
+}
+
+const LEGACY_PLAN_IDS: Record<string, string | null> = {
+  'plan-free': null,
+  'plan-family': 'plan-familiar',
+};
+
+function migrateUserPlanIds(): void {
+  const planes = getAll('plans');
+  const idsValidos = new Set(planes.map((plan) => plan.id));
+  const usuarios = getAll('users');
+  let huboCambios = false;
+
+  const migrados = usuarios.map((usuario) => {
+    let planId = usuario.planId;
+
+    if (planId && planId in LEGACY_PLAN_IDS) {
+      planId = LEGACY_PLAN_IDS[planId];
+    }
+    if (planId && !idsValidos.has(planId)) {
+      planId = null;
+    }
+    if (planId === usuario.planId) return usuario;
+
+    huboCambios = true;
+    return {
+      ...usuario,
+      planId,
+      card: planId ? usuario.card : undefined,
+      nextPaymentDate: planId ? usuario.nextPaymentDate : undefined,
+    };
+  });
+
+  if (huboCambios) save(STORAGE_KEYS.users, migrados);
+}
+
 export function initializeData(): void {
   const collections: CollectionName[] = [
     'users',
@@ -56,6 +107,13 @@ export function initializeData(): void {
 
   collections.forEach((col) => {
     const key = STORAGE_KEYS[col];
+
+    if (col === 'plans') {
+      const stored = read<unknown>(key, null);
+      if (!isPlanCollection(stored)) save(key, SEED_DATA.plans);
+      return;
+    }
+
     const exists = localStorage.getItem(key);
 
     if (exists === null) {
@@ -64,6 +122,8 @@ export function initializeData(): void {
       read(key, SEED_DATA[col]);
     }
   });
+
+  migrateUserPlanIds();
 }
 
 export function resetData(): void {
@@ -88,6 +148,14 @@ export function getById<K extends CollectionName>(
 ): CollectionMap[K] | undefined {
   const list = getAll(collection);
   return list.find((item) => item.id === id);
+}
+
+export function getPlans(): Plan[] {
+  return getAll('plans');
+}
+
+export function getPlanById(planId: string): Plan | undefined {
+  return getById('plans', planId);
 }
 
 export function add<K extends CollectionName>(

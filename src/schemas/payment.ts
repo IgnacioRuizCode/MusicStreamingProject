@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Plan } from '../types/types'
+import { SEED_PLANS } from '../data/seed/plans'
 
 export const paymentSchema = z.object({
   cardHolder: z.string().trim().min(3, 'Ingresá el nombre del titular'),
@@ -19,33 +19,4 @@ export const paymentSchema = z.object({
 
 export type PaymentValues = z.infer<typeof paymentSchema>
 
-export const plans: Plan[] = [
-  {
-    id: 'plan-free',
-    name: 'Free',
-    price: 0,
-    benefits: ['Ad-supported music', 'Shuffle play', 'Standard audio quality'],
-    featured: false,
-  },
-  {
-    id: 'plan-individual',
-    name: 'Individual',
-    price: 9.99,
-    benefits: ['Ad-free music', 'Download to listen offline', 'High audio quality', 'Cancel anytime'],
-    featured: true,
-  },
-  {
-    id: 'plan-duo',
-    name: 'Duo',
-    price: 12.99,
-    benefits: ['2 Premium accounts', 'Ad-free music', 'Offline playback', 'Duo Mix playlist'],
-    featured: false,
-  },
-  {
-    id: 'plan-family',
-    name: 'Family',
-    price: 15.99,
-    benefits: ['Up to 6 Premium accounts', 'Block explicit music', 'Ad-free music', 'Offline playback'],
-    featured: false,
-  },
-]
+export const plans = SEED_PLANS

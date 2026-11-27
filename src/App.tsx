@@ -30,8 +30,11 @@ const BibliotecaPage = lazy(() =>
 const PerfilPage = lazy(() =>
   import('./pages/PerfilPage').then((module) => ({ default: module.PerfilPage })),
 );
-const PlanesPage = lazy(() =>
-  import('./pages/PlanesPage').then((module) => ({ default: module.PlanesPage })),
+const PaginaPlanes = lazy(() =>
+  import('./pages/PaginaPlanes').then((module) => ({ default: module.PaginaPlanes })),
+);
+const PaginaPago = lazy(() =>
+  import('./pages/PaginaPago').then((module) => ({ default: module.PaginaPago })),
 );
 const AyudaPage = lazy(() =>
   import('./pages/AyudaPage').then((module) => ({ default: module.AyudaPage })),
@@ -73,11 +76,12 @@ export default function App() {
           <Route path="busqueda" element={<Navigate to="/search" replace />} />
           <Route path="artista/:id" element={<PaginaArtista />} />
           <Route path="playlist/:id" element={<PaginaPlaylist />} />
-          <Route path="planes" element={<PlanesPage />} />
+          <Route path="planes" element={<PaginaPlanes />} />
           <Route path="ayuda" element={<AyudaPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="biblioteca" element={<BibliotecaPage />} />
             <Route path="perfil" element={<PerfilPage />} />
+            <Route path="pago/:planId" element={<PaginaPago />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Route>

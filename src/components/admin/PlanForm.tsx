@@ -25,71 +25,71 @@ export function PlanForm({
   } = useForm<PlanFormData>({
     resolver: zodResolver(planSchema),
     defaultValues: {
-      name: valoresIniciales?.name ?? '',
-      price: valoresIniciales?.price ?? 0,
-      featured: valoresIniciales?.featured ?? false,
-      benefits: valoresIniciales?.benefits.length
-        ? valoresIniciales.benefits.map((b) => ({ value: b }))
+      nombre: valoresIniciales?.nombre ?? '',
+      precio: valoresIniciales?.precio ?? 0,
+      destacado: valoresIniciales?.destacado ?? false,
+      beneficios: valoresIniciales?.beneficios.length
+        ? valoresIniciales.beneficios.map((b) => ({ value: b }))
         : [{ value: '' }],
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'benefits',
+    name: 'beneficios',
   });
 
   useEffect(() => {
     reset({
-      name: valoresIniciales?.name ?? '',
-      price: valoresIniciales?.price ?? 0,
-      featured: valoresIniciales?.featured ?? false,
-      benefits: valoresIniciales?.benefits.length
-        ? valoresIniciales.benefits.map((b) => ({ value: b }))
+      nombre: valoresIniciales?.nombre ?? '',
+      precio: valoresIniciales?.precio ?? 0,
+      destacado: valoresIniciales?.destacado ?? false,
+      beneficios: valoresIniciales?.beneficios.length
+        ? valoresIniciales.beneficios.map((b) => ({ value: b }))
         : [{ value: '' }],
     });
   }, [valoresIniciales, reset]);
 
   const onSubmit = (data: PlanFormData) => {
     onGuardar({
-      name: data.name,
-      price: data.price,
-      featured: data.featured,
-      benefits: data.benefits.map((b) => b.value),
+      nombre: data.nombre,
+      precio: data.precio,
+      destacado: data.destacado,
+      beneficios: data.beneficios.map((b) => b.value),
     });
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="formulario-plan">
       <div>
-        <label htmlFor="plan-name">Nombre del plan</label>
+        <label htmlFor="plan-nombre">Nombre del plan</label>
         <input
-          id="plan-name"
+          id="plan-nombre"
           type="text"
-          {...register('name')}
+          {...register('nombre')}
           className="formulario-plan__input"
         />
-        {errors.name && (
-          <span className="formulario-plan__error">{errors.name.message}</span>
+        {errors.nombre && (
+          <span className="formulario-plan__error">{errors.nombre.message}</span>
         )}
       </div>
 
       <div>
-        <label htmlFor="plan-price">Precio</label>
+        <label htmlFor="plan-precio">Precio</label>
         <input
-          id="plan-price"
+          id="plan-precio"
           type="number"
           step="0.01"
-          {...register('price', { valueAsNumber: true })}
+          {...register('precio', { valueAsNumber: true })}
           className="formulario-plan__input"
         />
-        {errors.price && (
-          <span className="formulario-plan__error">{errors.price.message}</span>
+        {errors.precio && (
+          <span className="formulario-plan__error">{errors.precio.message}</span>
         )}
       </div>
 
       <label className="formulario-plan__checkbox">
-        <input type="checkbox" {...register('featured')} />
+        <input type="checkbox" {...register('destacado')} />
         Plan destacado
       </label>
 
@@ -108,12 +108,12 @@ export function PlanForm({
                 <input
                   type="text"
                   placeholder={`Beneficio ${index + 1}`}
-                  {...register(`benefits.${index}.value`)}
+                  {...register(`beneficios.${index}.value`)}
                   className="formulario-plan__input"
                 />
-                {errors.benefits?.[index]?.value && (
+                {errors.beneficios?.[index]?.value && (
                   <span className="formulario-plan__error--small">
-                    {errors.benefits[index]?.value?.message}
+                    {errors.beneficios[index]?.value?.message}
                   </span>
                 )}
               </div>
@@ -125,9 +125,9 @@ export function PlanForm({
             </div>
           ))}
         </div>
-        {errors.benefits?.root && (
+        {errors.beneficios?.root && (
           <span className="formulario-plan__error">
-            {errors.benefits.root.message}
+            {errors.beneficios.root.message}
           </span>
         )}
       </div>

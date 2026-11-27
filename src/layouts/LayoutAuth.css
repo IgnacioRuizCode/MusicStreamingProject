@@ -1,0 +1,57 @@
+.auth-layout {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 2rem 1.5rem;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(37, 99, 235, 0.28), transparent 34%),
+    radial-gradient(circle at 82% 18%, rgba(124, 58, 237, 0.24), transparent 32%),
+    radial-gradient(circle at 50% 100%, rgba(18, 10, 143, 0.35), transparent 45%),
+    #08080e;
+  color: var(--text-primary, #ffffff);
+}
+
+.auth-layout__brand {
+  display: inline-flex;
+  margin-bottom: 1.75rem;
+  border-radius: 10px;
+  outline: none;
+}
+
+.auth-layout__brand:focus-visible {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.55);
+}
+
+.auth-layout__logo {
+  display: block;
+  width: clamp(150px, 22vw, 190px);
+  height: auto;
+}
+
+.auth-layout__content {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.auth-layout__footnote {
+  margin: 1.5rem 0 0;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 480px) {
+  .auth-layout {
+    justify-content: flex-start;
+    padding: 2rem 1rem;
+  }
+
+  .auth-layout__brand {
+    margin-bottom: 1.25rem;
+  }
+}

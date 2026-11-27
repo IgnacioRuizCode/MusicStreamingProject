@@ -1,0 +1,121 @@
+.planes-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  color: var(--text-primary, #ffffff);
+}
+
+.planes-page__header {
+  max-width: 640px;
+}
+
+.planes-page__eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent-blue, #2563eb);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.planes-page__title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  line-height: 1.1;
+}
+
+.planes-page__subtitle {
+  margin: 0;
+  color: var(--text-secondary, #a7a7a7);
+  font-size: var(--font-size-md, 1rem);
+  line-height: 1.5;
+}
+
+.planes-page__actual {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(74, 222, 128, 0.28);
+  border-radius: 14px;
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.planes-page__actual > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.planes-page__actual-label {
+  color: #86efac;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.planes-page__actual-nombre {
+  font-size: 1.15rem;
+}
+
+.planes-page__actual-detalle {
+  color: var(--text-secondary, #a7a7a7);
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+.planes-page__cancelar {
+  flex-shrink: 0;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  border-radius: var(--radius-pill, 500px);
+  background: transparent;
+  color: #fca5a5;
+  font-family: var(--font-family, inherit);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-base, 0.3s ease);
+}
+
+.planes-page__cancelar:hover {
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.planes-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.planes-page__nota {
+  margin: 0;
+  color: var(--text-secondary, #a7a7a7);
+  font-size: var(--font-size-sm, 0.875rem);
+  text-align: center;
+}
+
+.planes-page__nota a {
+  color: var(--text-primary, #ffffff);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .planes-page {
+    gap: 1.25rem;
+  }
+
+  .planes-page__actual {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .planes-page__cancelar {
+    width: 100%;
+  }
+}

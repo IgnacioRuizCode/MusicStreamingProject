@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
@@ -7,17 +7,36 @@ import { registerSchema, type RegisterValues } from '../schemas/auth';
 import { useAuth } from '../hooks/useAuth';
 import { FormField } from '../components/auth/FormField';
 import { PasswordField } from '../components/auth/PasswordField';
+import { SESSION_KEYS } from '../services/storageKeys';
 import './AuthPages.css';
+
+const MESES = [
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
+];
 
 export function RegisterPage() {
   const { user, register: registerUser } = useAuth();
   const navigate = useNavigate();
+  const [birthParts, setBirthParts] = useState({ day: '', month: '', year: '' });
 
   const {
     register,
     handleSubmit,
+    setValue,
+    clearErrors,
     setError,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     mode: 'onBlur',
@@ -31,11 +50,68 @@ export function RegisterPage() {
     },
   });
 
-  useEffect(() => {
-    if (user && !isSubmitSuccessful) {
-      navigate('/', { replace: true });
+  const currentYear = new Date().getFullYear();
+  const years = useMemo(
+    () =>
+      Array.from({ length: currentYear - 1900 + 1 }, (_, index) =>
+        String(currentYear - index),
+      ),
+    [currentYear],
+  );
+
+  const days = useMemo(() => {
+    const year = Number(birthParts.year) || 2000;
+    const month = Number(birthParts.month) || 1;
+    const totalDays = new Date(year, month, 0).getDate();
+    return Array.from({ length: totalDays }, (_, index) =>
+      String(index + 1).padStart(2, '0'),
+    );
+  }, [birthParts.year, birthParts.month]);
+
+  const handleBirthPartChange = (
+    part: 'day' | 'month' | 'year',
+    value: string,
+  ) => {
+    const next = { ...birthParts, [part]: value };
+
+    if (part === 'month' || part === 'year') {
+      const year = Number(next.year) || 2000;
+      const month = Number(next.month) || 1;
+      const maxDay = new Date(year, month, 0).getDate();
+      if (next.day && Number(next.day) > maxDay) {
+        next.day = String(maxDay).padStart(2, '0');
+      }
     }
-  }, [user, isSubmitSuccessful, navigate]);
+
+    setBirthParts(next);
+
+    const isComplete = Boolean(next.day && next.month && next.year);
+    setValue(
+      'birthDate',
+      isComplete ? `${next.year}-${next.month}-${next.day}` : '',
+      {
+        shouldDirty: true,
+        shouldValidate: isComplete,
+      },
+    );
+
+    if (!isComplete) {
+      clearErrors('birthDate');
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+
+    const pendingPlanId = sessionStorage.getItem(SESSION_KEYS.pendingPlanId);
+    if (pendingPlanId) {
+      sessionStorage.removeItem(SESSION_KEYS.pendingPlanId);
+      navigate(`/pago/${pendingPlanId}`, { replace: true });
+      return;
+    }
+
+    navigate('/planes', { replace: true });
+  }, [user, navigate]);
 
   const onSubmit = (data: RegisterValues) => {
     const result = registerUser({
@@ -53,8 +129,13 @@ export function RegisterPage() {
       return;
     }
 
-    toast.success('¡Cuenta creada con éxito! Elegí tu plan para comenzar.');
-    navigate('/planes', { replace: true });
+    const pendingPlanId = sessionStorage.getItem(SESSION_KEYS.pendingPlanId);
+
+    toast.success(
+      pendingPlanId
+        ? '¡Cuenta creada con éxito! Completá el pago de tu plan.'
+        : '¡Cuenta creada con éxito! Elegí tu plan para comenzar.',
+    );
   };
 
   return (
@@ -117,16 +198,63 @@ export function RegisterPage() {
           label="Fecha de nacimiento"
           error={errors.birthDate?.message}
         >
-          <input
-            id="register-birthdate"
-            type="date"
-            autoComplete="bday"
-            max={new Date().toISOString().split('T')[0]}
-            aria-invalid={Boolean(errors.birthDate)}
-            aria-describedby={errors.birthDate ? 'register-birthdate-error' : undefined}
-            className={`auth-form__input${errors.birthDate ? ' auth-form__input--error' : ''}`}
-            {...register('birthDate')}
-          />
+          <input type="hidden" {...register('birthDate')} />
+          <div className="auth-date" role="group" aria-label="Fecha de nacimiento">
+            <select
+              id="register-birthdate"
+              value={birthParts.day}
+              autoComplete="bday-day"
+              aria-label="Día"
+              aria-invalid={Boolean(errors.birthDate)}
+              aria-describedby={errors.birthDate ? 'register-birthdate-error' : undefined}
+              className={`auth-form__select${errors.birthDate ? ' auth-form__select--error' : ''}`}
+              onChange={(event) => handleBirthPartChange('day', event.target.value)}
+            >
+              <option value="">Día</option>
+              {days.map((day) => (
+                <option key={day} value={day}>
+                  {day}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={birthParts.month}
+              autoComplete="bday-month"
+              aria-label="Mes"
+              aria-invalid={Boolean(errors.birthDate)}
+              aria-describedby={errors.birthDate ? 'register-birthdate-error' : undefined}
+              className={`auth-form__select${errors.birthDate ? ' auth-form__select--error' : ''}`}
+              onChange={(event) => handleBirthPartChange('month', event.target.value)}
+            >
+              <option value="">Mes</option>
+              {MESES.map((month, index) => {
+                const value = String(index + 1).padStart(2, '0');
+                return (
+                  <option key={value} value={value}>
+                    {month}
+                  </option>
+                );
+              })}
+            </select>
+
+            <select
+              value={birthParts.year}
+              autoComplete="bday-year"
+              aria-label="Año"
+              aria-invalid={Boolean(errors.birthDate)}
+              aria-describedby={errors.birthDate ? 'register-birthdate-error' : undefined}
+              className={`auth-form__select${errors.birthDate ? ' auth-form__select--error' : ''}`}
+              onChange={(event) => handleBirthPartChange('year', event.target.value)}
+            >
+              <option value="">Año</option>
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
         </FormField>
 
         <PasswordField

@@ -18,7 +18,7 @@ export function NavbarLogueado({ query, onQueryChange }: NavbarLogueadoProps) {
   const menuRef = useRef<HTMLDivElement>(null)
 
   const isAdmin = user?.role === 'admin'
-  const isPremium = Boolean(user?.planId) && user?.planId !== 'plan-free'
+  const tienePlan = Boolean(user?.planId)
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -63,7 +63,7 @@ export function NavbarLogueado({ query, onQueryChange }: NavbarLogueadoProps) {
       >
         <Search size={20} />
       </IconButton>
-      {!isPremium && (
+      {!tienePlan && (
         <Link to="/planes" className="btn btn--secondary navbar__plan-button">
           Explorar planes
         </Link>

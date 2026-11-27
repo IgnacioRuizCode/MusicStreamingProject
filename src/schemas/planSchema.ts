@@ -1,16 +1,16 @@
 import { z } from 'zod';
 
 export const planSchema = z.object({
-  name: z
+  nombre: z
     .string()
     .trim()
     .min(2, 'El nombre debe tener al menos 2 caracteres')
     .max(60, 'El nombre no puede superar los 60 caracteres'),
-  price: z
+  precio: z
     .number({ message: 'Debe ser un número válido' })
     .min(0, 'El precio no puede ser negativo'),
-  featured: z.boolean(),
-  benefits: z
+  destacado: z.boolean(),
+  beneficios: z
     .array(
       z.object({
         value: z.string().trim().min(2, 'El beneficio no puede estar vacío'),
