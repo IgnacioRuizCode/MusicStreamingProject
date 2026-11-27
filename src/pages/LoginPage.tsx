@@ -7,6 +7,7 @@ import { loginSchema, type LoginValues } from '../schemas/auth';
 import { useAuth } from '../hooks/useAuth';
 import { FormField } from '../components/auth/FormField';
 import { PasswordField } from '../components/auth/PasswordField';
+import { SESSION_KEYS } from '../services/storageKeys';
 import './AuthPages.css';
 
 interface LocationState {
@@ -34,10 +35,27 @@ export function LoginPage() {
   });
 
   useEffect(() => {
-    if (user) {
-      navigate('/', { replace: true });
+    if (!user) return;
+
+    const pendingPlanId = sessionStorage.getItem(SESSION_KEYS.pendingPlanId);
+    if (pendingPlanId) {
+      sessionStorage.removeItem(SESSION_KEYS.pendingPlanId);
+      navigate(`/pago/${pendingPlanId}`, { replace: true });
+      return;
     }
-  }, [user, navigate]);
+
+    if (fromPath && fromPath !== '/login') {
+      navigate(fromPath, { replace: true });
+      return;
+    }
+
+    if (user.role === 'admin') {
+      navigate('/admin', { replace: true });
+      return;
+    }
+
+    navigate('/', { replace: true });
+  }, [user, fromPath, navigate]);
 
   const onSubmit = (data: LoginValues) => {
     const result = login(data.email, data.password);
@@ -48,14 +66,6 @@ export function LoginPage() {
     }
 
     toast.success(`¡Bienvenido, ${result.user?.username ?? 'de nuevo'}!`);
-
-    if (fromPath && fromPath !== '/login') {
-      navigate(fromPath, { replace: true });
-    } else if (result.user?.role === 'admin') {
-      navigate('/admin', { replace: true });
-    } else {
-      navigate('/', { replace: true });
-    }
   };
 
   return (
@@ -109,7 +119,7 @@ export function LoginPage() {
 
       <footer className="auth-card__footer">
         ¿No tenés cuenta?{' '}
-        <Link to="/registro" className="auth-card__link">
+        <Link to="/register" className="auth-card__link">
           Registrate
         </Link>
       </footer>

@@ -9,6 +9,8 @@ import {
 } from 'react';
 import type { Song } from '../types/types';
 import { getById } from '../services/storageServices';
+import { useAuth } from '../hooks/useAuth';
+import { AuthPromptModal } from '../components/player/AuthPromptModal';
 
 export type PlayableSong = Song & { url?: string; audioUrl?: string };
 export type RepeatMode = 'off' | 'all' | 'one';
@@ -23,6 +25,8 @@ export interface PlayerContextType {
   isFloating: boolean;
   isShuffle: boolean;
   repeatMode: RepeatMode;
+  authPromptSong: PlayableSong | null;
+  closeAuthPrompt: () => void;
   playSong: (song: PlayableSong, nextQueue?: PlayableSong[]) => void;
   playSongById: (songId: string, nextQueue?: PlayableSong[]) => PlayableSong | undefined;
   removeFromQueue: (songId: string) => void;
@@ -52,10 +56,12 @@ function getAudioElement(): HTMLAudioElement {
 }
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [audioElement] = useState(getAudioElement);
   const audioRef = useRef<HTMLAudioElement | null>(audioElement);
   const previousVolumeRef = useRef<number>(0.7);
 
+  const [authPromptSong, setAuthPromptSong] = useState<PlayableSong | null>(null);
   const [currentSong, setCurrentSong] = useState<PlayableSong | null>(null);
   const [queue, setQueue] = useState<PlayableSong[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -239,14 +245,28 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentSong]);
 
-  const playSong = useCallback((song: PlayableSong, nextQueue?: PlayableSong[]) => {
-    setCurrentSong(song);
-    setIsPlaying(true);
-    if (nextQueue && nextQueue.length > 0) {
-      setQueue(nextQueue);
-    } else {
-      setQueue((prev) => (prev.some((item) => item.id === song.id) ? prev : [song, ...prev]));
-    }
+  const playSong = useCallback(
+    (song: PlayableSong, nextQueue?: PlayableSong[]) => {
+      if (!user) {
+        setAuthPromptSong(song);
+        return;
+      }
+
+      setCurrentSong(song);
+      setIsPlaying(true);
+      if (nextQueue && nextQueue.length > 0) {
+        setQueue(nextQueue);
+      } else {
+        setQueue((prev) =>
+          prev.some((item) => item.id === song.id) ? prev : [song, ...prev],
+        );
+      }
+    },
+    [user],
+  );
+
+  const closeAuthPrompt = useCallback(() => {
+    setAuthPromptSong(null);
   }, []);
 
   const playSongById = useCallback(
@@ -335,6 +355,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         isFloating,
         isShuffle,
         repeatMode,
+        authPromptSong,
+        closeAuthPrompt,
         playSong,
         playSongById,
         removeFromQueue,
@@ -352,6 +374,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
+      <AuthPromptModal song={authPromptSong} onClose={closeAuthPrompt} />
     </PlayerContext.Provider>
   );
 }

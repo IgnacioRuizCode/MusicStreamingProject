@@ -4,6 +4,7 @@ import {
   add,
   clearSession,
   getById,
+  getPlanById,
   getSession,
   getUserByEmail,
   saveSession,
@@ -13,6 +14,7 @@ import type {
   AuthContextType,
   AuthResult,
   RegisterData,
+  ResumenPago,
   SessionUser,
   User,
 } from '../types/types';
@@ -25,6 +27,12 @@ function toSessionUser(user: User): SessionUser {
   const safeUser = { ...user };
   delete (safeUser as Partial<User>).password;
   return safeUser;
+}
+
+function calcularProximoCobro(): string {
+  const fecha = new Date();
+  fecha.setMonth(fecha.getMonth() + 1);
+  return fecha.toISOString();
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -119,7 +127,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
   };
 
-  const subscribe = (planId: string): AuthResult => {
+  const suscribirse = (
+    planId: string,
+    resumenPago?: ResumenPago,
+  ): AuthResult => {
     if (!user) {
       return {
         success: false,
@@ -127,7 +138,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
     }
 
-    const plan = getById('plans', planId);
+    const plan = getPlanById(planId);
     if (!plan) {
       return {
         success: false,
@@ -135,7 +146,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
     }
 
-    const updatedUser = update('users', user.id, { planId: planId });
+    const esPago = plan.precio > 0;
+    const updatedUser = update('users', user.id, {
+      planId,
+      card:
+        esPago && resumenPago
+          ? { last4: resumenPago.ultimos4, brand: resumenPago.marca }
+          : undefined,
+      nextPaymentDate: esPago ? calcularProximoCobro() : undefined,
+    });
+
     if (!updatedUser) {
       return {
         success: false,
@@ -150,9 +170,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return { success: true, user: safeUser };
   };
 
+  const cancelarSuscripcion = (): AuthResult => {
+    if (!user) {
+      return {
+        success: false,
+        error: 'Debés iniciar sesión para cancelar tu suscripción.',
+      };
+    }
+
+    const updatedUser = update('users', user.id, {
+      planId: null,
+      card: undefined,
+      nextPaymentDate: undefined,
+    });
+
+    if (!updatedUser) {
+      return {
+        success: false,
+        error: 'No se pudo cancelar la suscripción.',
+      };
+    }
+
+    const safeUser = toSessionUser(updatedUser);
+    saveSession(safeUser);
+    setUser(safeUser);
+
+    return { success: true, user: safeUser };
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, register, login, logout, subscribe }}
+      value={{
+        user,
+        loading,
+        register,
+        login,
+        logout,
+        suscribirse,
+        cancelarSuscripcion,
+      }}
     >
       {children}
     </AuthContext.Provider>

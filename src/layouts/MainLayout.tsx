@@ -3,17 +3,21 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/navbar/navbar';
 import { Sidebar } from '../components/Sidebar/Sidebar';
 import { Player } from '../components/player/Player';
+import { GuestBanner } from '../components/player/GuestBanner';
 import { RouteFallback } from '../components/RouteFallback';
 import { usePlayerContext } from '../context/PlayerContext';
+import { useAuth } from '../hooks/useAuth';
 import './MainLayout.css';
 
 export function MainLayout() {
   const contentRef = useRef<HTMLDivElement>(null);
   const { pathname } = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth();
   const { isFloating } = usePlayerContext();
   const isPlayerFloating =
-    isFloating || pathname.startsWith('/search') || pathname.startsWith('/buscar');
+    Boolean(user) &&
+    (isFloating || pathname.startsWith('/search') || pathname.startsWith('/buscar'));
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: 'instant' });
@@ -59,7 +63,7 @@ export function MainLayout() {
         className="layout-player"
         style={isPlayerFloating ? { height: 0, minHeight: 0, padding: 0, border: 'none' } : undefined}
       >
-        <Player />
+        {user ? <Player /> : <GuestBanner />}
       </div>
 
       <nav className="layout-bottom-nav">
