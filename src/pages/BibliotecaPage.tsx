@@ -6,6 +6,8 @@ import { usePlayer } from '../hooks/usePlayer';
 import {
   deleteUserPlaylist,
   getAll,
+  getArtistSongs,
+  getPlaylistSongs,
   getUserPlaylists,
 } from '../services/storageServices';
 import { CardPlaylist } from '../components/cardplaylist/CardPlaylist';
@@ -59,6 +61,24 @@ export function BibliotecaPage() {
       toast.success('Playlist eliminada');
       setVersion((v) => v + 1);
     }
+  };
+
+  const handlePlayPlaylist = (playlistId: string) => {
+    const tracks = getPlaylistSongs(playlistId);
+    if (tracks.length === 0) {
+      toast.info('Esta playlist todavía no tiene canciones');
+      return;
+    }
+    playSong(tracks[0], tracks);
+  };
+
+  const handlePlayArtist = (artistId: string) => {
+    const tracks = getArtistSongs(artistId);
+    if (tracks.length === 0) {
+      toast.info('Este artista todavía no tiene canciones');
+      return;
+    }
+    playSong(tracks[0], tracks);
   };
 
   return (
@@ -119,6 +139,8 @@ export function BibliotecaPage() {
                     title={playlist.title}
                     description={playlist.description}
                     image={playlist.cover}
+                    songCount={playlist.songIds.length}
+                    onPlay={handlePlayPlaylist}
                   />
                   {playlist.creatorId === user.id && (
                     <button
@@ -209,7 +231,9 @@ export function BibliotecaPage() {
                   id={artist.id}
                   name={artist.name}
                   image={artist.image}
+                  monthlyListeners={artist.monthlyListeners}
                   songIds={artist.songIds}
+                  onPlay={handlePlayArtist}
                 />
               ))}
             </div>

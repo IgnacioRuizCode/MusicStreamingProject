@@ -13,11 +13,14 @@
   min-height: 260px;
   padding: 2rem;
   border-radius: 16px;
+  overflow: hidden;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+  background-clip: padding-box;
   display: flex;
   align-items: flex-end;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .artist-header-content {

@@ -2,14 +2,16 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Bookmark,
+  Check,
   Clock,
   Heart,
   ListPlus,
   Pause,
   Play,
+  Plus,
+  Search,
   Sparkles,
   Trash2,
-  X,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -23,6 +25,7 @@ import {
 import { usePlayerContext } from '../context/PlayerContext';
 import { useAuth } from '../hooks/useAuth';
 import { useDominantColor } from '../hooks/useDominantColor';
+import { AgregarAPlaylistModal } from '../components/AgregarAPlaylistModal';
 import type { Song } from '../types/types';
 import './PaginaPlaylist.css';
 
@@ -153,6 +156,7 @@ export function PaginaPlaylist() {
   const { user, toggleSavedPlaylist, toggleLikedSong } = useAuth();
   const [refreshTick, setRefreshTick] = useState(0);
   const [songForPlaylist, setSongForPlaylist] = useState<Song | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const playlist = useMemo(() => {
     void refreshTick;
@@ -166,6 +170,8 @@ export function PaginaPlaylist() {
     return playlist ? getPlaylistSongs(playlist.id) : [];
   }, [playlist, refreshTick]);
 
+  const allSongs = useMemo(() => getAll('songs'), []);
+
   const creatorName = useMemo(() => {
     if (!playlist) return 'Codify';
     const creator = getById('users', playlist.creatorId);
@@ -178,10 +184,18 @@ export function PaginaPlaylist() {
     return map;
   }, []);
 
-  const userCreatedPlaylists = useMemo(() => {
-    if (!user) return [];
-    return getAll('playlists').filter((p) => p.creatorId === user.id);
-  }, [user]);
+  const candidateSongs = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    const filtered = q
+      ? allSongs.filter((song) => {
+          const artist = (artistNameById.get(song.artistId) ?? '').toLowerCase();
+          return (
+            song.title.toLowerCase().includes(q) || artist.includes(q)
+          );
+        })
+      : allSongs;
+    return filtered.slice(0, 8);
+  }, [allSongs, artistNameById, searchTerm]);
 
   const duracionTotal = useMemo(
     () => canciones.reduce((total, cancion) => total + cancion.duration, 0),
@@ -247,20 +261,22 @@ export function PaginaPlaylist() {
     [isOwner, playlist],
   );
 
-  const handleAddSongToPlaylist = (targetPlaylistId: string, songId: string) => {
-    const pl = getById('playlists', targetPlaylistId);
-    if (!pl) return;
-    if (pl.songIds.includes(songId)) {
-      toast.info('Esa canción ya está en la playlist');
-      setSongForPlaylist(null);
-      return;
-    }
-    update('playlists', targetPlaylistId, { songIds: [...pl.songIds, songId] });
-    notifyStorageChange();
-    setRefreshTick((v) => v + 1);
-    toast.success(`Agregada a "${pl.title}"`);
-    setSongForPlaylist(null);
-  };
+  const handleQuickAddToCurrent = useCallback(
+    (song: Song) => {
+      if (!playlist || !isOwner) return;
+      if (playlist.songIds.includes(song.id)) {
+        toast.info('Esa canción ya está en esta playlist');
+        return;
+      }
+      update('playlists', playlist.id, {
+        songIds: [...playlist.songIds, song.id],
+      });
+      notifyStorageChange();
+      setRefreshTick((v) => v + 1);
+      toast.success(`"${song.title}" agregada a "${playlist.title}"`);
+    },
+    [isOwner, playlist],
+  );
 
   if (!playlist) {
     return (
@@ -357,7 +373,8 @@ export function PaginaPlaylist() {
 
         {canciones.length === 0 ? (
           <p className="playlist-empty">
-            Esta playlist todavía no tiene canciones.
+            Esta playlist todavía no tiene canciones.{' '}
+            {isOwner && 'Buscá abajo para agregar tus primeras canciones.'}
           </p>
         ) : (
           <div className="playlist-table">
@@ -389,61 +406,74 @@ export function PaginaPlaylist() {
             ))}
           </div>
         )}
+
+        {isOwner && (
+          <div className="playlist-finder">
+            <div className="playlist-finder__header">
+              <h2 className="playlist-finder__title">
+                Buscá canciones para tu playlist
+              </h2>
+              <div className="playlist-finder__input-wrap">
+                <Search size={16} className="playlist-finder__icon" aria-hidden="true" />
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Buscar por canción o artista..."
+                  className="playlist-finder__input"
+                  aria-label="Buscar canciones para agregar a la playlist"
+                />
+              </div>
+            </div>
+
+            <div className="playlist-finder__list">
+              {candidateSongs.map((song) => {
+                const alreadyInPlaylist = playlist.songIds.includes(song.id);
+                const artistName =
+                  artistNameById.get(song.artistId) ?? 'Artista desconocido';
+
+                return (
+                  <div key={song.id} className="playlist-finder__row">
+                    <img
+                      src={song.cover}
+                      alt=""
+                      className="playlist-finder__cover"
+                      loading="lazy"
+                    />
+                    <div className="playlist-finder__meta">
+                      <strong>{song.title}</strong>
+                      <span>{artistName}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={`playlist-finder__add-btn${alreadyInPlaylist ? ' is-added' : ''}`}
+                      disabled={alreadyInPlaylist}
+                      onClick={() => handleQuickAddToCurrent(song)}
+                    >
+                      {alreadyInPlaylist ? (
+                        <>
+                          <Check size={14} /> Agregada
+                        </>
+                      ) : (
+                        <>
+                          <Plus size={14} /> Agregar
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </section>
 
-      {songForPlaylist && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="playlist-picker__backdrop"
-          onClick={() => setSongForPlaylist(null)}
-        >
-          <div
-            className="playlist-picker__dialog"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="playlist-picker__header">
-              <h3 className="playlist-picker__title">
-                Agregar &ldquo;{songForPlaylist.title}&rdquo; a...
-              </h3>
-              <button
-                type="button"
-                className="playlist-song-action-btn"
-                aria-label="Cerrar"
-                onClick={() => setSongForPlaylist(null)}
-              >
-                <X size={18} />
-              </button>
-            </div>
-            {userCreatedPlaylists.length === 0 ? (
-              <p className="playlist-picker__empty">
-                Todavía no creaste ninguna playlist propia. Podés crear una desde{' '}
-                <Link
-                  to="/biblioteca"
-                  className="playlist-picker__link"
-                  onClick={() => setSongForPlaylist(null)}
-                >
-                  Tu biblioteca
-                </Link>
-                .
-              </p>
-            ) : (
-              <div className="playlist-picker__list">
-                {userCreatedPlaylists.map((pl) => (
-                  <button
-                    key={pl.id}
-                    type="button"
-                    className="btn btn--secondary playlist-picker__option"
-                    onClick={() => handleAddSongToPlaylist(pl.id, songForPlaylist.id)}
-                  >
-                    {pl.title}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <AgregarAPlaylistModal
+        song={songForPlaylist}
+        userId={user?.id}
+        onClose={() => setSongForPlaylist(null)}
+        onAdded={() => setRefreshTick((v) => v + 1)}
+      />
     </motion.main>
   );
 }

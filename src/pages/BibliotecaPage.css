@@ -186,3 +186,26 @@
   color: var(--text-secondary, #a7a7a7);
   font-size: 0.92rem;
 }
+@media (max-width: 600px) {
+  .biblioteca-page,
+  .perfil-page {
+    padding: 0.75rem 0.25rem 2rem;
+    gap: 1.15rem;
+  }
+
+  .biblioteca-header,
+  .perfil-header {
+    padding: 1.25rem;
+  }
+
+  .biblioteca-section,
+  .perfil-card {
+    padding: 1.15rem;
+  }
+
+  .biblioteca-grid,
+  .perfil-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
