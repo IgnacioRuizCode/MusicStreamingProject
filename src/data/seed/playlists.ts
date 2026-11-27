@@ -1,0 +1,60 @@
+import { type Playlist } from '../../types/types';
+
+export const SEED_PLAYLISTS: Playlist[] = [
+  {
+    id: 'pl-1',
+    title: 'Top 50: Argentina',
+    description: 'Tu actualización diaria de los temas más escuchados en Argentina ahora mismo.',
+    cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80',
+    creatorId: 'user-admin',
+    songIds: ['song-9', 'song-10', 'song-21', 'song-22', 'song-17', 'song-1', 'song-5', 'song-13'],
+  },
+  {
+    id: 'pl-2',
+    title: 'Éxitos Globales 2026',
+    description: 'Los hits mundiales que dominan todos los rankings.',
+    cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80',
+    creatorId: 'user-admin',
+    songIds: ['song-1', 'song-2', 'song-5', 'song-13', 'song-17', 'song-25', 'song-29'],
+  },
+  {
+    id: 'pl-3',
+    title: 'Beast Mode: Gym & Entreno',
+    description: 'Bass pesado, trap y electrónica para romper tus marcas.',
+    cover: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
+    creatorId: 'user-admin',
+    songIds: ['song-29', 'song-30', 'song-31', 'song-9', 'song-11', 'song-18', 'song-3'],
+  },
+  {
+    id: 'pl-4',
+    title: 'Late Night R&B & Chill',
+    description: 'Vibra nocturna, sintetizadores suaves y beats para bajar un cambio.',
+    cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&q=80',
+    creatorId: 'user-demo',
+    songIds: ['song-2', 'song-4', 'song-6', 'song-8', 'song-16', 'song-28', 'song-32'],
+  },
+  {
+    id: 'pl-5',
+    title: 'Pop & Urbano Latino',
+    description: 'Lo mejor de la escena urbana y el pop en español.',
+    cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80',
+    creatorId: 'user-admin',
+    songIds: ['song-9', 'song-12', 'song-17', 'song-19', 'song-20', 'song-21', 'song-23', 'song-24'],
+  },
+  {
+    id: 'pl-6',
+    title: 'Ruta & Clásicos Modernos',
+    description: 'Temazos infalibles para subir el volumen en el auto.',
+    cover: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&q=80',
+    creatorId: 'user-demo',
+    songIds: ['song-1', 'song-7', 'song-14', 'song-15', 'song-25', 'song-26', 'song-27'],
+  },
+  {
+    id: 'pl-7',
+    title: 'This Is Feid 💚',
+    description: 'Todos los palos del Ferxxo en un solo lugar. Mor, dale play.',
+    cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80',
+    creatorId: 'user-admin',
+    songIds: ['song-33', 'song-34', 'song-35', 'song-36', 'song-37'],
+  },
+];

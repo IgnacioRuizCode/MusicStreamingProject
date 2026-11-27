@@ -1,78 +1,128 @@
-# React + TypeScript + Vite
+<p align="center">
+  <img src="./public/logo/logo.png" alt="CODIFY" width="320">
+</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<p align="center">
+  Plataforma web de streaming de música inspirada en Spotify.<br>
+  Proyecto grupal de <b>Rolling Code School</b> · Full Stack Web Development.
+</p>
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Sobre el proyecto
 
-## React Compiler
+**CODIFY** es una aplicación web de streaming de música donde los usuarios pueden explorar artistas y playlists, buscar canciones, reproducirlas y suscribirse a un plan. También cuenta con un panel de administración para gestionar el contenido.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+> **Proyecto educativo:** no tiene backend. Los datos se guardan en `localStorage`, y la sesión y los pagos son **simulados**. No usar datos reales de tarjetas.
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
+**Deploy:** _próximamente_
 
-## Expanding the ESLint configuration
+## Capturas
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Escritorio | Mobile |
+| --- | --- |
+| ![Home escritorio](./docs/home-escritorio.png) | ![Home mobile](./docs/home-mobile.png) |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Funcionalidades
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Registro e inicio de sesión con validaciones.
+- Home con playlists y artistas, páginas de playlist y de artista.
+- Reproductor persistente en todas las páginas.
+- Búsqueda de canciones, artistas y playlists.
+- Planes de suscripción y formulario de pago con tarjeta interactiva.
+- Perfil de usuario: datos, plan y biblioteca.
+- Panel de administración (CRUD de artistas, canciones, playlists, planes y usuarios).
+- Rutas protegidas según rol (invitado, usuario y administrador).
+- Diseño responsive (escritorio y mobile).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tecnologías
 
+- [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vite.dev/)
+- [React Router](https://reactrouter.com/)
+- [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- `localStorage` como base de datos simulada
+- ESLint + Prettier
+
+## Instalación
+
+Requisitos: [Node.js](https://nodejs.org/) (versión LTS) y Git.
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/<usuario-o-organizacion>/MusicStreamingProject.git
+
+# 2. Entrar a la carpeta
+cd MusicStreamingProject
+
+# 3. Instalar dependencias
+npm install
+
+# 4. Levantar el servidor de desarrollo
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+La app queda disponible en `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Scripts
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Comando | Descripción |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm run preview` | Vista previa del build |
+| `npm run lint` | Revisión con ESLint |
+
+## Usuario de prueba
+
+Para probar el panel de administración:
+
+| Rol | Correo | Contraseña |
+| --- | --- | --- |
+| Administrador | `admin@codify.com` | `Admin1234` |
+
+Los usuarios comunes se crean desde la pantalla de registro. Los datos iniciales se cargan automáticamente la primera vez que se abre la app.
+
+## Estructura del proyecto
 
 ```
+src/
+├── assets/        # Imágenes y recursos
+├── components/   # Componentes reutilizables (cards, formularios, etc.)
+├── context/     # AuthContext, PlayerContext
+├── schemas/      # Esquemas de validación (Zod)
+├── hooks/         # Hooks personalizados
+├── layouts/       # Layout principal, de autenticación y de admin
+├── pages/       # Páginas de la aplicación
+├── seed/          # Datos iniciales de ejemplo
+├── services/     # Acceso a localStorage y funciones de datos
+├── types/         # Tipos de TypeScript
+└── utils/         # Funciones auxiliares
+```
+
+## Guía de diseño
+
+Tema oscuro, con fuente **Inter** y color de marca `#120A8F`. Las variables CSS (colores, tipografía, bordes y transiciones) están definidas en `src/estilos`.
+
+## Flujo de trabajo con Git
+
+- **Ramas:**
+  - `main`: versión estable, protegida. Solo recibe cambios desde `develop`.
+  - `develop`: integración del trabajo del equipo.
+  - `feature/<nombre-del-ticket>` y `fix/<descripcion>`: una rama por ticket, creada desde `develop`.
+- **Commits:** mensajes cortos y claros, con prefijo: `feat:`, `fix:`, `style:`, `docs:`, `refactor:`.
+- **Pull Requests:** cada ticket entra a `develop` por Pull Request, con la revisión de al menos un compañero.
+- Nunca subir archivos `.env` ni claves al repositorio.
+
+## Equipo
+
+| Integrante | Rol | GitHub |
+| --- | --- | --- |
+| Ruiz, Ignacio | Tech Leader |
+| Russo, Emilse | Scrum Master |
+| Saravia, Juan Manuel | Desarrollador |
+| Nieva Corvalan, Samihel | Desarrollador |
+
+## Aclaración
+
+CODIFY es un proyecto con fines educativos y no tiene relación con Spotify. Las imágenes y los audios de ejemplo son de prueba.

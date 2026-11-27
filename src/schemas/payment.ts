@@ -1,6 +1,25 @@
-import { type Plan } from '../types/types';
+import { z } from 'zod'
+import type { Plan } from '../types/types'
 
-export const SEED_PLANS: Plan[] = [
+export const paymentSchema = z.object({
+  cardHolder: z.string().trim().min(3, 'Ingresá el nombre del titular'),
+  cardNumber: z
+    .string()
+    .trim()
+    .regex(/^(?:\d{4}[ -]?){3}\d{4}$/, 'Ingresá un número de tarjeta válido'),
+  expiry: z
+    .string()
+    .trim()
+    .regex(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Formato MM/AA'),
+  cvv: z
+    .string()
+    .trim()
+    .regex(/^\d{3,4}$/, 'CVV inválido'),
+})
+
+export type PaymentValues = z.infer<typeof paymentSchema>
+
+export const plans: Plan[] = [
   {
     id: 'plan-free',
     name: 'Free',
@@ -29,4 +48,4 @@ export const SEED_PLANS: Plan[] = [
     benefits: ['Up to 6 Premium accounts', 'Block explicit music', 'Ad-free music', 'Offline playback'],
     featured: false,
   },
-];
+]
