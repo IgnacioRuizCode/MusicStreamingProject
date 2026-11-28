@@ -228,7 +228,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }, [isPlaying, currentSong]);
 
-  // Integración nativa con controles multimedia de Windows / Chrome
   useEffect(() => {
     if (!currentSong || typeof navigator === 'undefined' || !('mediaSession' in navigator)) {
       return;
@@ -251,7 +250,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     navigator.mediaSession.setActionHandler('previoustrack', previous);
   }, [currentSong, next, previous]);
 
-  // Atajo global con barra espaciadora (Space)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code !== 'Space') return;

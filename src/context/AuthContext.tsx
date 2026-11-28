@@ -377,7 +377,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return { success: false, error: 'Sesión no iniciada.' };
     }
 
-    // Eliminar playlists creadas por el usuario
     const allPlaylists = getAll('playlists');
     save(
       STORAGE_KEYS.playlists,
