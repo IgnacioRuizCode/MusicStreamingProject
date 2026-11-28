@@ -17,6 +17,8 @@ export interface User {
   email: string;
   password: string;
   username: string;
+  firstName?: string;
+  lastName?: string;
   birthDate: string;
   avatar?: string;
   role: Role;
@@ -83,6 +85,8 @@ export interface CollectionMap {
 export type CollectionName = keyof CollectionMap;
 
 export interface RegisterData {
+  firstName: string;
+  lastName: string;
   username: string;
   email: string;
   password: string;

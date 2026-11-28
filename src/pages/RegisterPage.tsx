@@ -41,6 +41,8 @@ export function RegisterPage() {
     resolver: zodResolver(registerSchema),
     mode: 'onBlur',
     defaultValues: {
+      firstName: '',
+      lastName: '',
       username: '',
       email: '',
       birthDate: '',
@@ -115,6 +117,8 @@ export function RegisterPage() {
 
   const onSubmit = (data: RegisterValues) => {
     const result = registerUser({
+      firstName: data.firstName,
+      lastName: data.lastName,
       username: data.username,
       email: data.email,
       password: data.password,
@@ -150,6 +154,44 @@ export function RegisterPage() {
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
+        <FormField
+          id="register-first-name"
+          label="Nombre"
+          error={errors.firstName?.message}
+        >
+          <input
+            id="register-first-name"
+            type="text"
+            autoComplete="given-name"
+            placeholder="Tu nombre"
+            minLength={3}
+            maxLength={20}
+            aria-invalid={Boolean(errors.firstName)}
+            aria-describedby={errors.firstName ? 'register-first-name-error' : undefined}
+            className={`auth-form__input${errors.firstName ? ' auth-form__input--error' : ''}`}
+            {...register('firstName')}
+          />
+        </FormField>
+
+        <FormField
+          id="register-last-name"
+          label="Apellido"
+          error={errors.lastName?.message}
+        >
+          <input
+            id="register-last-name"
+            type="text"
+            autoComplete="family-name"
+            placeholder="Tu apellido"
+            minLength={3}
+            maxLength={20}
+            aria-invalid={Boolean(errors.lastName)}
+            aria-describedby={errors.lastName ? 'register-last-name-error' : undefined}
+            className={`auth-form__input${errors.lastName ? ' auth-form__input--error' : ''}`}
+            {...register('lastName')}
+          />
+        </FormField>
+
         <FormField
           id="register-username"
           label="Nombre de usuario"

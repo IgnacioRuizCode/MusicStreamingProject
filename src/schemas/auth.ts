@@ -32,6 +32,16 @@ const isAtLeast13YearsOld = (dateString: string): boolean => {
 
 export const registerSchema = z
   .object({
+    firstName: z
+      .string()
+      .trim()
+      .min(3, 'El nombre debe tener al menos 3 caracteres')
+      .max(20, 'El nombre no puede superar los 20 caracteres'),
+    lastName: z
+      .string()
+      .trim()
+      .min(3, 'El apellido debe tener al menos 3 caracteres')
+      .max(20, 'El apellido no puede superar los 20 caracteres'),
     username: z
       .string()
       .trim()

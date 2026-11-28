@@ -114,6 +114,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const newUser = add('users', {
       username: data.username.trim(),
+      firstName: data.firstName.trim(),
+      lastName: data.lastName.trim(),
       email: normalizedEmail,
       password: data.password,
       role: 'user',
