@@ -1,46 +1,13 @@
-import { memo, useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Play, Music, Disc, User, Globe } from 'lucide-react';
 import { getAll, search } from '../services/storageServices';
 import { searchItunesSongs } from '../services/musicApiService';
 import { usePlayerContext } from '../context/PlayerContext';
+import { ArtistCard } from '../components/ArtistCard/ArtistCard';
+import { CardPlaylist } from '../components/cardplaylist/CardPlaylist';
 import type { Artist, Song } from '../types/types';
 import './SearchPage.css';
-
-interface SearchCardProps {
-  to: string;
-  title: string;
-  subtitle: string;
-  image: string;
-  round?: boolean;
-}
-
-const SearchCard = memo(function SearchCard({
-  to,
-  title,
-  subtitle,
-  image,
-  round = false,
-}: SearchCardProps) {
-  return (
-    <Link to={to} className={`search-card${round ? ' search-card--artist' : ''}`}>
-      <div className={`search-card__cover-wrap${round ? ' search-card__cover-wrap--round' : ''}`}>
-        <img
-          src={image}
-          alt={title}
-          className={`search-card__cover${round ? ' search-card__cover--round' : ''}`}
-          loading="lazy"
-          decoding="async"
-        />
-        <span className="search-card__play-badge" aria-hidden="true">
-          <Play size={18} fill="currentColor" />
-        </span>
-      </div>
-      <strong className="search-card__title">{title}</strong>
-      <span className="search-card__subtitle">{subtitle}</span>
-    </Link>
-  );
-});
 
 interface SearchSongRowProps {
   song: Song;
@@ -102,12 +69,42 @@ export function SearchPage() {
   const { playSong } = usePlayerContext();
 
   const artists = useMemo(() => getAll('artists'), []);
+  const allSongs = useMemo(() => getAll('songs'), []);
   const allPlaylists = useMemo(() => getAll('playlists'), []);
   const artistNameById = useMemo(
     () => new Map<string, string>(artists.map((artist: Artist) => [artist.id, artist.name])),
     [artists],
   );
   const results = useMemo(() => search(deferredQuery), [deferredQuery]);
+
+  const handlePlayArtist = useCallback(
+    (artistId: string, songIds?: string[]) => {
+      const artistSongs = songIds?.length
+        ? allSongs.filter((song) => songIds.includes(song.id))
+        : allSongs.filter((song) => song.artistId === artistId);
+
+      if (artistSongs.length > 0) {
+        playSong(artistSongs[0], artistSongs);
+      }
+    },
+    [allSongs, playSong],
+  );
+
+  const handlePlayPlaylist = useCallback(
+    (playlistId: string) => {
+      const playlist = allPlaylists.find((item) => item.id === playlistId);
+      if (!playlist) return;
+
+      const playlistSongs = playlist.songIds
+        .map((songId) => allSongs.find((song) => song.id === songId))
+        .filter((song): song is Song => Boolean(song));
+
+      if (playlistSongs.length > 0) {
+        playSong(playlistSongs[0], playlistSongs);
+      }
+    },
+    [allPlaylists, allSongs, playSong],
+  );
 
   const isSearchingOnline =
     trimmedQuery.length > 0 && onlineState.term !== trimmedQuery;
@@ -152,12 +149,14 @@ export function SearchPage() {
           <h2 className="search-page__section-title">Explorar playlists</h2>
           <div className="search-page__grid">
             {allPlaylists.map((playlist) => (
-              <SearchCard
+              <CardPlaylist
                 key={playlist.id}
-                to={`/playlist/${playlist.id}`}
+                id={playlist.id}
                 title={playlist.title}
-                subtitle={playlist.description}
+                description={playlist.description}
                 image={playlist.cover}
+                songCount={playlist.songIds.length}
+                onPlay={handlePlayPlaylist}
               />
             ))}
           </div>
@@ -194,7 +193,7 @@ export function SearchPage() {
                 <Globe size={18} /> Resultados globales (Previews 30s)
               </h2>
               {isSearchingOnline ? (
-                <p className="search-card__subtitle">Buscando canciones...</p>
+                <p className="search-page__loading-text">Buscando canciones...</p>
               ) : (
                 <div className="search-songs-list">
                   {onlineSongs.map((song) => (
@@ -218,13 +217,14 @@ export function SearchPage() {
               </h2>
               <div className="search-page__grid">
                 {results.artists.map((artist) => (
-                  <SearchCard
+                  <ArtistCard
                     key={artist.id}
-                    to={`/artista/${artist.id}`}
-                    title={artist.name}
-                    subtitle="Artista"
+                    id={artist.id}
+                    name={artist.name}
                     image={artist.image}
-                    round
+                    monthlyListeners={artist.monthlyListeners}
+                    songIds={artist.songIds}
+                    onPlay={handlePlayArtist}
                   />
                 ))}
               </div>
@@ -238,12 +238,14 @@ export function SearchPage() {
               </h2>
               <div className="search-page__grid">
                 {results.playlists.map((playlist) => (
-                  <SearchCard
+                  <CardPlaylist
                     key={playlist.id}
-                    to={`/playlist/${playlist.id}`}
+                    id={playlist.id}
                     title={playlist.title}
-                    subtitle={playlist.description}
+                    description={playlist.description}
                     image={playlist.cover}
+                    songCount={playlist.songIds.length}
+                    onPlay={handlePlayPlaylist}
                   />
                 ))}
               </div>
