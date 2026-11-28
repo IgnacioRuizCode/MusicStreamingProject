@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { artistSchema, type Artist, type ArtistFormData } from '../../schemas/artistSchema';
 import { ImagePreview } from './ImagePreview';
@@ -20,7 +20,7 @@ export function ArtistForm({
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ArtistFormData>({
     resolver: zodResolver(artistSchema),
@@ -31,8 +31,8 @@ export function ArtistForm({
     },
   });
 
-  const nombre = watch('name');
-  const imagen = watch('image');
+  const nombre = useWatch({ control, name: 'name' });
+  const imagen = useWatch({ control, name: 'image' });
 
   useEffect(() => {
     reset({

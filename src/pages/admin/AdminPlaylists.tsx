@@ -238,6 +238,7 @@ export function AdminPlaylists() {
           tamano="lg"
         >
           <PlaylistForm
+            key={playlistEditando?.id ?? 'nueva'}
             usuarios={usuarios}
             canciones={canciones}
             artistas={artistas}

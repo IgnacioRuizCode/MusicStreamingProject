@@ -146,6 +146,7 @@ export function Player() {
   const {
     currentSong,
     queue,
+    queueSource,
     isPlaying,
     audioElement,
     volume,
@@ -322,7 +323,7 @@ export function Player() {
                   <li
                     key={track.id}
                     className={`player-queue__item${isCurrent ? ' is-active' : ''}`}
-                    onClick={() => playSong(track, queue)}
+                    onClick={() => playSong(track, queue, queueSource)}
                   >
                     <img
                       src={track.cover}

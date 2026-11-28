@@ -2,12 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  getAll,
-  getById,
-  notifyStorageChange,
-  update,
-} from '../services/storageServices';
+import { addSongToPlaylist, getAll, getById } from '../services/storageServices';
 import type { Song } from '../types/types';
 import './AgregarAPlaylistModal.css';
 
@@ -40,8 +35,7 @@ export function AgregarAPlaylistModal({
       return;
     }
 
-    update('playlists', playlistId, { songIds: [...pl.songIds, song.id] });
-    notifyStorageChange();
+    addSongToPlaylist(playlistId, song.id);
     toast.success(`Agregada a "${pl.title}"`);
     onAdded?.();
     onClose();

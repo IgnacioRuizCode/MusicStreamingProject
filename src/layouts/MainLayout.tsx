@@ -17,9 +17,7 @@ export function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
   const { isFloating } = usePlayerContext();
-  const isPlayerFloating =
-    Boolean(user) &&
-    (isFloating || pathname.startsWith('/search') || pathname.startsWith('/buscar'));
+  const isPlayerFloating = Boolean(user) && isFloating;
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: 'instant' });

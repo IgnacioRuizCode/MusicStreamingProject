@@ -1,11 +1,14 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Play, Music, Disc, User, Globe } from 'lucide-react';
-import { getAll, search } from '../services/storageServices';
+import { Play, Music, Disc, User, Globe, ListPlus } from 'lucide-react';
+import { toast } from 'sonner';
+import { getById, getAll, importExternalSong, search } from '../services/storageServices';
 import { searchItunesSongs } from '../services/musicApiService';
 import { usePlayerContext } from '../context/PlayerContext';
+import { useAuth } from '../hooks/useAuth';
 import { ArtistCard } from '../components/ArtistCard/ArtistCard';
 import { CardPlaylist } from '../components/cardplaylist/CardPlaylist';
+import { AgregarAPlaylistModal } from '../components/AgregarAPlaylistModal';
 import type { Artist, Song } from '../types/types';
 import './SearchPage.css';
 
@@ -14,6 +17,7 @@ interface SearchSongRowProps {
   queue: Song[];
   artistName: string;
   onPlay: (song: Song, queue: Song[]) => void;
+  onAddToPlaylist?: (song: Song) => void;
 }
 
 const SearchSongRow = memo(function SearchSongRow({
@@ -21,6 +25,7 @@ const SearchSongRow = memo(function SearchSongRow({
   queue,
   artistName,
   onPlay,
+  onAddToPlaylist,
 }: SearchSongRowProps) {
   return (
     <div className="search-song-row" onClick={() => onPlay(song, queue)}>
@@ -42,9 +47,25 @@ const SearchSongRow = memo(function SearchSongRow({
           <span>{artistName}</span>
         </div>
       </div>
-      <span className="search-song-row__duration">
-        {formatDuration(song.duration)}
-      </span>
+      <div className="search-song-row__right">
+        {onAddToPlaylist && (
+          <button
+            type="button"
+            className="search-song-row__add"
+            aria-label={`Agregar ${song.title} a una playlist`}
+            title="Agregar a una playlist"
+            onClick={(event) => {
+              event.stopPropagation();
+              onAddToPlaylist(song);
+            }}
+          >
+            <ListPlus size={16} />
+          </button>
+        )}
+        <span className="search-song-row__duration">
+          {formatDuration(song.duration)}
+        </span>
+      </div>
     </div>
   );
 });
@@ -67,6 +88,8 @@ export function SearchPage() {
   }>({ term: '', songs: [] });
 
   const { playSong } = usePlayerContext();
+  const { user } = useAuth();
+  const [songForPlaylist, setSongForPlaylist] = useState<Song | null>(null);
 
   const artists = useMemo(() => getAll('artists'), []);
   const allSongs = useMemo(() => getAll('songs'), []);
@@ -84,7 +107,7 @@ export function SearchPage() {
         : allSongs.filter((song) => song.artistId === artistId);
 
       if (artistSongs.length > 0) {
-        playSong(artistSongs[0], artistSongs);
+        playSong(artistSongs[0], artistSongs, { type: 'artist', id: artistId });
       }
     },
     [allSongs, playSong],
@@ -100,7 +123,10 @@ export function SearchPage() {
         .filter((song): song is Song => Boolean(song));
 
       if (playlistSongs.length > 0) {
-        playSong(playlistSongs[0], playlistSongs);
+        playSong(playlistSongs[0], playlistSongs, {
+          type: 'playlist',
+          id: playlist.id,
+        });
       }
     },
     [allPlaylists, allSongs, playSong],
@@ -129,6 +155,26 @@ export function SearchPage() {
       window.clearTimeout(timeoutId);
     };
   }, [trimmedQuery]);
+
+  const handleAddToPlaylist = useCallback(
+    (song: Song) => {
+      if (!user) {
+        toast.info('Iniciá sesión para agregar canciones a tus playlists');
+        return;
+      }
+
+      const storedSong = getById('songs', song.id);
+      const catalogSong = storedSong ?? importExternalSong(song);
+
+      if (!catalogSong) {
+        toast.error('No se pudo agregar esta canción al catálogo');
+        return;
+      }
+
+      setSongForPlaylist(catalogSong);
+    },
+    [user],
+  );
 
   const getArtistName = (artistId: string) =>
     artistNameById.get(artistId) ?? artistId;
@@ -180,7 +226,10 @@ export function SearchPage() {
                     song={song}
                     queue={results.songs}
                     artistName={getArtistName(song.artistId)}
-                    onPlay={playSong}
+                    onPlay={(selectedSong, selectedQueue) =>
+                      playSong(selectedSong, selectedQueue, { type: 'search', id: 'catalog' })
+                    }
+                    onAddToPlaylist={handleAddToPlaylist}
                   />
                 ))}
               </div>
@@ -202,7 +251,13 @@ export function SearchPage() {
                       song={song}
                       queue={onlineSongs}
                       artistName={song.artistId}
-                      onPlay={playSong}
+                      onPlay={(selectedSong, selectedQueue) =>
+                        playSong(selectedSong, selectedQueue, {
+                          type: 'search',
+                          id: 'itunes',
+                        })
+                      }
+                      onAddToPlaylist={handleAddToPlaylist}
                     />
                   ))}
                 </div>
@@ -253,6 +308,12 @@ export function SearchPage() {
           )}
         </div>
       )}
+
+      <AgregarAPlaylistModal
+        song={songForPlaylist}
+        userId={user?.id}
+        onClose={() => setSongForPlaylist(null)}
+      />
     </main>
   );
 }

@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Disc3, ListPlus, Pause, Play, Users } from 'lucide-react';
 import { usePlayerContext } from '../context/PlayerContext';
@@ -241,10 +241,26 @@ export function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [songForPlaylist, setSongForPlaylist] = useState<Song | null>(null);
+  const [storageVersion, setStorageVersion] = useState(0);
 
-  const songs = useMemo(() => getAll('songs'), []);
-  const playlists = useMemo(() => getAll('playlists'), []);
-  const artists = useMemo(() => getAll('artists'), []);
+  useEffect(() => {
+    const handleStorageChange = () => setStorageVersion((value) => value + 1);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const songs = useMemo(() => {
+    void storageVersion;
+    return getAll('songs');
+  }, [storageVersion]);
+  const playlists = useMemo(() => {
+    void storageVersion;
+    return getAll('playlists');
+  }, [storageVersion]);
+  const artists = useMemo(() => {
+    void storageVersion;
+    return getAll('artists');
+  }, [storageVersion]);
 
   const artistNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -252,7 +268,8 @@ export function HomePage() {
     return map;
   }, [artists]);
 
-  const { currentSong, isPlaying, playSong, togglePlay } = usePlayerContext();
+  const { currentSong, isPlaying, playSong, queueSource, togglePlay } =
+    usePlayerContext();
 
   const handleOpenPlaylist = useCallback(
     (playlistId: string) => navigate(`/playlist/${playlistId}`),
@@ -270,7 +287,7 @@ export function HomePage() {
         togglePlay();
         return;
       }
-      playSong(song, songs);
+      playSong(song, songs, { type: 'home' });
     },
     [currentSong?.id, playSong, songs, togglePlay],
   );
@@ -280,16 +297,18 @@ export function HomePage() {
       const playlistTracks = getPlaylistSongs(playlist.id);
       if (playlistTracks.length === 0) return;
 
-      const isPlaylistCurrent = playlistTracks.some(
-        (track) => track.id === currentSong?.id,
-      );
-      if (isPlaylistCurrent && currentSong) {
+      const isPlaylistCurrent =
+        queueSource?.type === 'playlist' && queueSource.id === playlist.id;
+      if (isPlaylistCurrent) {
         togglePlay();
         return;
       }
-      playSong(playlistTracks[0], playlistTracks);
+      playSong(playlistTracks[0], playlistTracks, {
+        type: 'playlist',
+        id: playlist.id,
+      });
     },
-    [currentSong, playSong, togglePlay],
+    [playSong, queueSource, togglePlay],
   );
 
   const handlePlayArtist = useCallback(
@@ -297,16 +316,18 @@ export function HomePage() {
       const artistTracks = getArtistSongs(artist.id);
       if (artistTracks.length === 0) return;
 
-      const isArtistCurrent = artistTracks.some(
-        (track) => track.id === currentSong?.id,
-      );
-      if (isArtistCurrent && currentSong) {
+      const isArtistCurrent =
+        queueSource?.type === 'artist' && queueSource.id === artist.id;
+      if (isArtistCurrent) {
         togglePlay();
         return;
       }
-      playSong(artistTracks[0], artistTracks);
+      playSong(artistTracks[0], artistTracks, {
+        type: 'artist',
+        id: artist.id,
+      });
     },
-    [currentSong, playSong, togglePlay],
+    [playSong, queueSource, togglePlay],
   );
 
   return (
@@ -320,8 +341,8 @@ export function HomePage() {
           {playlists.map((playlist) => {
             const isActivePlaylist =
               isPlaying &&
-              currentSong !== null &&
-              playlist.songIds.includes(currentSong.id);
+              queueSource?.type === 'playlist' &&
+              queueSource.id === playlist.id;
 
             return (
               <HomePlaylistCard
@@ -344,7 +365,9 @@ export function HomePage() {
         <div className="home-grid">
           {artists.map((artist) => {
             const isActiveArtist =
-              isPlaying && currentSong?.artistId === artist.id;
+              isPlaying &&
+              queueSource?.type === 'artist' &&
+              queueSource.id === artist.id;
 
             return (
               <HomeArtistCard

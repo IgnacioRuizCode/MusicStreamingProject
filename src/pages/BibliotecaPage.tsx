@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Heart, Music, Play, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../hooks/useAuth';
@@ -25,6 +25,12 @@ export function BibliotecaPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [playlistToDelete, setPlaylistToDelete] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
+
+  useEffect(() => {
+    const handleStorageChange = () => setVersion((value) => value + 1);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const playlists = useMemo(() => {
     void version;
@@ -69,7 +75,7 @@ export function BibliotecaPage() {
       toast.info('Esta playlist todavía no tiene canciones');
       return;
     }
-    playSong(tracks[0], tracks);
+    playSong(tracks[0], tracks, { type: 'playlist', id: playlistId });
   };
 
   const handlePlayArtist = (artistId: string) => {
@@ -78,7 +84,7 @@ export function BibliotecaPage() {
       toast.info('Este artista todavía no tiene canciones');
       return;
     }
-    playSong(tracks[0], tracks);
+    playSong(tracks[0], tracks, { type: 'artist', id: artistId });
   };
 
   return (
@@ -191,7 +197,7 @@ export function BibliotecaPage() {
                       className="biblioteca-icon-btn"
                       aria-label={`Reproducir ${song.title}`}
                       title="Reproducir"
-                      onClick={() => playSong(song, likedSongs)}
+                      onClick={() => playSong(song, likedSongs, { type: 'liked' })}
                     >
                       <Play size={16} />
                     </button>

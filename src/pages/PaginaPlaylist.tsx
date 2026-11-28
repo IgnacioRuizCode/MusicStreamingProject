@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Bookmark,
@@ -16,11 +16,11 @@ import {
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import {
+  addSongToPlaylist,
   getById,
   getPlaylistSongs,
   getAll,
-  notifyStorageChange,
-  update,
+  removeSongFromPlaylist,
 } from '../services/storageServices';
 import { usePlayerContext } from '../context/PlayerContext';
 import { useAuth } from '../hooks/useAuth';
@@ -99,11 +99,23 @@ const PlaylistSongRow = memo(function PlaylistSongRow({
         />
         <div className="playlist-song-titles">
           <strong className="playlist-song-name">{song.title}</strong>
-          <span className="playlist-song-artist-mobile">{artistName}</span>
+          <Link
+            to={`/artista/${song.artistId}`}
+            className="playlist-song-artist-mobile"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {artistName}
+          </Link>
         </div>
       </div>
 
-      <span className="playlist-song-artist">{artistName}</span>
+      <Link
+        to={`/artista/${song.artistId}`}
+        className="playlist-song-artist"
+        onClick={(event) => event.stopPropagation()}
+      >
+        {artistName}
+      </Link>
 
       <span
         className="playlist-song-duration"
@@ -152,12 +164,18 @@ const PlaylistSongRow = memo(function PlaylistSongRow({
 
 export function PaginaPlaylist() {
   const { id } = useParams<{ id: string }>();
-  const { currentSong, isPlaying, playSong, togglePlay } = usePlayerContext();
+  const { currentSong, isPlaying, playSong, queueSource, togglePlay } = usePlayerContext();
   const { user, toggleSavedPlaylist, toggleLikedSong } = useAuth();
   const [refreshTick, setRefreshTick] = useState(0);
   const [songForPlaylist, setSongForPlaylist] = useState<Song | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [descExpanded, setDescExpanded] = useState(false);
+
+  useEffect(() => {
+    const handleStorageChange = () => setRefreshTick((value) => value + 1);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const playlist = useMemo(() => {
     void refreshTick;
@@ -210,29 +228,29 @@ export function PaginaPlaylist() {
 
   const isPlaylistPlaying =
     isPlaying &&
-    currentSong !== null &&
-    canciones.some((cancion) => cancion.id === currentSong.id);
+    queueSource?.type === 'playlist' &&
+    queueSource.id === playlist?.id;
 
   const handlePlayAll = useCallback(() => {
     const firstSong = canciones[0];
     if (!firstSong) return;
 
-    if (currentSong && canciones.some((cancion) => cancion.id === currentSong.id)) {
+    if (isPlaylistPlaying) {
       togglePlay();
       return;
     }
-    playSong(firstSong, canciones);
-  }, [canciones, currentSong, playSong, togglePlay]);
+    playSong(firstSong, canciones, { type: 'playlist', id: playlist?.id });
+  }, [canciones, isPlaylistPlaying, playSong, playlist?.id, togglePlay]);
 
   const handleSongSelect = useCallback(
     (song: Song, isCurrent: boolean) => {
       if (isCurrent) {
         togglePlay();
       } else {
-        playSong(song, canciones);
+        playSong(song, canciones, { type: 'playlist', id: playlist?.id });
       }
     },
-    [canciones, playSong, togglePlay],
+    [canciones, playSong, playlist?.id, togglePlay],
   );
 
   const handleToggleLike = useCallback(
@@ -252,10 +270,7 @@ export function PaginaPlaylist() {
   const handleRemoveFromPlaylist = useCallback(
     (song: Song) => {
       if (!playlist || !isOwner) return;
-      update('playlists', playlist.id, {
-        songIds: playlist.songIds.filter((sId) => sId !== song.id),
-      });
-      notifyStorageChange();
+      removeSongFromPlaylist(playlist.id, song.id);
       setRefreshTick((v) => v + 1);
       toast.info(`"${song.title}" quitada de la playlist`);
     },
@@ -269,10 +284,7 @@ export function PaginaPlaylist() {
         toast.info('Esa canción ya está en esta playlist');
         return;
       }
-      update('playlists', playlist.id, {
-        songIds: [...playlist.songIds, song.id],
-      });
-      notifyStorageChange();
+      addSongToPlaylist(playlist.id, song.id);
       setRefreshTick((v) => v + 1);
       toast.success(`"${song.title}" agregada a "${playlist.title}"`);
     },

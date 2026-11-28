@@ -408,3 +408,89 @@ export function deleteUserPlaylist(playlistId: string, userId: string): boolean 
   if (deleted) notifyStorageChange();
   return deleted;
 }
+
+export function addSongToPlaylist(playlistId: string, songId: string): boolean {
+  const playlist = getById('playlists', playlistId);
+  if (!playlist || playlist.songIds.includes(songId)) return false;
+
+  const updated = update('playlists', playlistId, {
+    songIds: [...playlist.songIds, songId],
+  });
+  if (!updated) return false;
+
+  notifyStorageChange();
+  return true;
+}
+
+export function addSongsToPlaylist(
+  playlistId: string,
+  songIds: string[],
+): Playlist | null {
+  const playlist = getById('playlists', playlistId);
+  if (!playlist) return null;
+
+  const nuevos = songIds.filter((songId) => !playlist.songIds.includes(songId));
+  if (nuevos.length === 0) return playlist;
+
+  const updated = update('playlists', playlistId, {
+    songIds: [...playlist.songIds, ...nuevos],
+  });
+  if (updated) notifyStorageChange();
+  return updated;
+}
+
+export function removeSongFromPlaylist(
+  playlistId: string,
+  songId: string,
+): boolean {
+  const playlist = getById('playlists', playlistId);
+  if (!playlist || !playlist.songIds.includes(songId)) return false;
+
+  const updated = update('playlists', playlistId, {
+    songIds: playlist.songIds.filter((id) => id !== songId),
+  });
+  if (!updated) return false;
+
+  notifyStorageChange();
+  return true;
+}
+
+export function importExternalSong(song: Song): Song | null {
+  if (!song.url) return null;
+
+  const existente = getAll('songs').find((item) => item.url === song.url);
+  if (existente) return existente;
+
+  const artistas = getAll('artists');
+  const nombreArtista = song.artistId.trim();
+  let artista = artistas.find(
+    (item) => item.name.trim().toLowerCase() === nombreArtista.toLowerCase(),
+  );
+
+  if (!artista) {
+    artista = add('artists', {
+      name: nombreArtista,
+      image: song.cover,
+      monthlyListeners: 0,
+      songIds: [],
+    });
+  }
+
+  const created = add('songs', {
+    title: song.title,
+    artistId: artista.id,
+    cover: song.cover,
+    url: song.url,
+    duration: song.duration,
+  });
+
+  const artistasActualizados = getAll('artists').map((item) =>
+    item.id === artista?.id
+      ? { ...item, songIds: [...item.songIds, created.id] }
+      : item,
+  );
+  save(STORAGE_KEYS.artists, artistasActualizados);
+  notifyStorageChange();
+
+  return created;
+}

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useMemo, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   adminPlaylistSchema,
@@ -33,8 +33,7 @@ export function PlaylistForm({
   const {
     register,
     handleSubmit,
-    reset,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<AdminPlaylistFormData>({
     resolver: zodResolver(adminPlaylistSchema),
@@ -46,8 +45,8 @@ export function PlaylistForm({
     },
   });
 
-  const titulo = watch('title');
-  const portada = watch('cover');
+  const titulo = useWatch({ control, name: 'title' });
+  const portada = useWatch({ control, name: 'cover' });
 
   const artistasPorId = useMemo(
     () => new Map(artistas.map((artista) => [artista.id, artista.name])),
@@ -65,16 +64,6 @@ export function PlaylistForm({
       );
     });
   }, [busquedaCancion, canciones, artistasPorId]);
-
-  useEffect(() => {
-    reset({
-      title: valoresIniciales?.title ?? '',
-      description: valoresIniciales?.description ?? '',
-      cover: valoresIniciales?.cover ?? '',
-      creatorId: valoresIniciales?.creatorId ?? '',
-    });
-    setSongIds(valoresIniciales?.songIds ?? []);
-  }, [valoresIniciales, reset]);
 
   const toggleCancion = (songId: string) => {
     setSongIds((actuales) =>

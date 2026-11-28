@@ -14,10 +14,23 @@ import { AuthPromptModal } from '../components/player/AuthPromptModal';
 
 export type PlayableSong = Song & { url?: string; audioUrl?: string };
 export type RepeatMode = 'off' | 'all' | 'one';
+export type PlaybackSourceType =
+  | 'playlist'
+  | 'artist'
+  | 'search'
+  | 'home'
+  | 'liked'
+  | 'song';
+
+export interface PlaybackSource {
+  type: PlaybackSourceType;
+  id?: string;
+}
 
 export interface PlayerContextType {
   currentSong: PlayableSong | null;
   queue: PlayableSong[];
+  queueSource: PlaybackSource | null;
   isPlaying: boolean;
   audioElement: HTMLAudioElement | null;
   volume: number;
@@ -27,8 +40,16 @@ export interface PlayerContextType {
   repeatMode: RepeatMode;
   authPromptSong: PlayableSong | null;
   closeAuthPrompt: () => void;
-  playSong: (song: PlayableSong, nextQueue?: PlayableSong[]) => void;
-  playSongById: (songId: string, nextQueue?: PlayableSong[]) => PlayableSong | undefined;
+  playSong: (
+    song: PlayableSong,
+    nextQueue?: PlayableSong[],
+    source?: PlaybackSource | null,
+  ) => void;
+  playSongById: (
+    songId: string,
+    nextQueue?: PlayableSong[],
+    source?: PlaybackSource | null,
+  ) => PlayableSong | undefined;
   removeFromQueue: (songId: string) => void;
   togglePlay: () => void;
   pause: () => void;
@@ -64,6 +85,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [authPromptSong, setAuthPromptSong] = useState<PlayableSong | null>(null);
   const [currentSong, setCurrentSong] = useState<PlayableSong | null>(null);
   const [queue, setQueue] = useState<PlayableSong[]>([]);
+  const [queueSource, setQueueSource] = useState<PlaybackSource | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.7);
   const [isMuted, setIsMuted] = useState(false);
@@ -80,6 +102,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return () => {
       audio.pause();
     };
+  }, []);
+
+  const advanceToSong = useCallback((song: PlayableSong) => {
+    setQueue((prev) =>
+      prev.some((item) => item.id === song.id) ? prev : [song, ...prev],
+    );
+    setCurrentSong(song);
+    setIsPlaying(true);
   }, []);
 
   const next = useCallback(() => {
@@ -109,8 +139,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         randomIndex = Math.floor(Math.random() * queue.length);
       }
       const randomSong = queue[randomIndex];
-      setCurrentSong(randomSong);
-      setIsPlaying(true);
+      if (randomSong) {
+        advanceToSong(randomSong);
+      }
       return;
     }
 
@@ -128,10 +159,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const nextSong = queue[nextIndex];
 
     if (nextSong) {
-      setCurrentSong(nextSong);
-      setIsPlaying(true);
+      advanceToSong(nextSong);
     }
-  }, [currentSong, queue, isShuffle, repeatMode]);
+  }, [advanceToSong, currentSong, queue, isShuffle, repeatMode]);
 
   const previous = useCallback(() => {
     if (!currentSong) return;
@@ -151,10 +181,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const prevSong = queue[prevIndex];
 
     if (prevSong) {
-      setCurrentSong(prevSong);
-      setIsPlaying(true);
+      advanceToSong(prevSong);
     }
-  }, [currentSong, queue]);
+  }, [advanceToSong, currentSong, queue]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -246,7 +275,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [currentSong]);
 
   const playSong = useCallback(
-    (song: PlayableSong, nextQueue?: PlayableSong[]) => {
+    (
+      song: PlayableSong,
+      nextQueue?: PlayableSong[],
+      source: PlaybackSource | null = null,
+    ) => {
       if (!user) {
         setAuthPromptSong(song);
         return;
@@ -254,6 +287,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
       setCurrentSong(song);
       setIsPlaying(true);
+      setQueueSource(source);
       if (nextQueue && nextQueue.length > 0) {
         setQueue(nextQueue);
       } else {
@@ -270,10 +304,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const playSongById = useCallback(
-    (songId: string, nextQueue?: PlayableSong[]) => {
+    (
+      songId: string,
+      nextQueue?: PlayableSong[],
+      source: PlaybackSource | null = null,
+    ) => {
       const song = getById('songs', songId) as PlayableSong | undefined;
       if (song) {
-        playSong(song, nextQueue);
+        playSong(song, nextQueue, source);
       }
       return song;
     },
@@ -348,6 +386,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       value={{
         currentSong,
         queue,
+        queueSource,
         isPlaying,
         audioElement,
         volume,

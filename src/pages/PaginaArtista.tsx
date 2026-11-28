@@ -3,11 +3,10 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Heart, ListPlus, Play, X } from 'lucide-react';
 import { toast } from 'sonner';
 import {
+  addSongToPlaylist,
   getAll,
   getArtistSongs,
   getById,
-  notifyStorageChange,
-  update,
 } from '../services/storageServices';
 import { usePlayer } from '../hooks/usePlayer';
 import { useAuth } from '../hooks/useAuth';
@@ -139,17 +138,17 @@ export function PaginaArtista() {
 
   const reproducirCancion = useCallback(
     (cancion: Song) => {
-      playSong(cancion, canciones);
+      playSong(cancion, canciones, { type: 'artist', id: artista?.id });
     },
-    [canciones, playSong],
+    [artista?.id, canciones, playSong],
   );
 
   const reproducirArtista = useCallback(() => {
     const primeraCancion = canciones[0];
     if (primeraCancion) {
-      playSong(primeraCancion, canciones);
+      playSong(primeraCancion, canciones, { type: 'artist', id: artista?.id });
     }
-  }, [canciones, playSong]);
+  }, [artista?.id, canciones, playSong]);
 
   const cambiarSeguimiento = useCallback(() => {
     if (loading || !artista) return;
@@ -189,8 +188,7 @@ export function PaginaArtista() {
       setSongForPlaylist(null);
       return;
     }
-    update('playlists', playlistId, { songIds: [...pl.songIds, songId] });
-    notifyStorageChange();
+    addSongToPlaylist(playlistId, songId);
     toast.success(`Agregada a "${pl.title}"`);
     setSongForPlaylist(null);
   };

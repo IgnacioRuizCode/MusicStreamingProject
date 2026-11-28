@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   adminSongSchema,
@@ -25,7 +25,7 @@ export function SongForm({
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<AdminSongFormData>({
     resolver: zodResolver(adminSongSchema),
@@ -38,9 +38,9 @@ export function SongForm({
     },
   });
 
-  const titulo = watch('title');
-  const portada = watch('cover');
-  const artistaId = watch('artistId');
+  const titulo = useWatch({ control, name: 'title' });
+  const portada = useWatch({ control, name: 'cover' });
+  const artistaId = useWatch({ control, name: 'artistId' });
   const artista = artistas.find((item) => item.id === artistaId);
 
   useEffect(() => {

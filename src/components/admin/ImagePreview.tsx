@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface ImagePreviewProps {
   src?: string;
@@ -13,11 +13,8 @@ export function ImagePreview({
   redonda = false,
   grande = false,
 }: ImagePreviewProps) {
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    setError(false);
-  }, [src]);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const error = Boolean(src && failedSrc === src);
 
   const clase = [
     'admin-thumb',
@@ -41,7 +38,7 @@ export function ImagePreview({
       src={src}
       alt={alt}
       loading="lazy"
-      onError={() => setError(true)}
+      onError={() => setFailedSrc(src)}
     />
   );
 }

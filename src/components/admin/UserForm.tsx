@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   adminUserSchema,
@@ -27,7 +27,7 @@ export function UserForm({
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<AdminUserFormData>({
     resolver: zodResolver(adminUserSchema),
@@ -39,8 +39,8 @@ export function UserForm({
     },
   });
 
-  const nombre = watch('username');
-  const avatar = watch('avatar');
+  const nombre = useWatch({ control, name: 'username' });
+  const avatar = useWatch({ control, name: 'avatar' });
 
   useEffect(() => {
     reset({

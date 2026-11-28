@@ -109,6 +109,38 @@
   color: var(--text-secondary);
 }
 
+.search-song-row__right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.search-song-row__add {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  background-color: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.search-song-row:hover .search-song-row__add,
+.search-song-row__add:focus-visible {
+  opacity: 1;
+}
+
+.search-song-row__add:hover {
+  background-color: rgba(139, 92, 246, 0.2);
+  color: #ffffff;
+}
+
 .search-song-row__duration {
   font-size: 0.8rem;
   color: var(--text-secondary);
@@ -146,5 +178,9 @@
 
   .search-song-row {
     padding: 0.45rem 0.5rem;
+  }
+
+  .search-song-row__add {
+    opacity: 1;
   }
 }
