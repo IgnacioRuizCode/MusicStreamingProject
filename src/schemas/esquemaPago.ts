@@ -67,7 +67,8 @@ export const esquemaPago = z
     titular: z
       .string()
       .trim()
-      .min(1, 'Ingresá el nombre del titular')
+      .min(3, 'El nombre del titular debe tener al menos 3 caracteres')
+      .max(20, 'El nombre del titular no puede superar los 20 caracteres')
       .regex(soloLetrasYEspacios, 'El titular solo puede contener letras y espacios'),
     numero: z
       .string()

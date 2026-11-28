@@ -2,7 +2,11 @@ import { z } from 'zod'
 import { SEED_PLANS } from '../data/seed/plans'
 
 export const paymentSchema = z.object({
-  cardHolder: z.string().trim().min(3, 'Ingresá el nombre del titular'),
+  cardHolder: z
+    .string()
+    .trim()
+    .min(3, 'El nombre del titular debe tener al menos 3 caracteres')
+    .max(20, 'El nombre del titular no puede superar los 20 caracteres'),
   cardNumber: z
     .string()
     .trim()

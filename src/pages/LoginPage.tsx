@@ -92,6 +92,8 @@ export function LoginPage() {
             type="email"
             autoComplete="email"
             placeholder="ejemplo@streaming.com"
+            minLength={3}
+            maxLength={60}
             aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? 'login-email-error' : undefined}
             className={`auth-form__input${errors.email ? ' auth-form__input--error' : ''}`}

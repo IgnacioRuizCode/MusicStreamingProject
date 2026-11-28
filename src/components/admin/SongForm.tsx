@@ -73,6 +73,8 @@ export function SongForm({
             type="text"
             className="admin-input"
             placeholder="Ej. Around the World"
+            minLength={3}
+            maxLength={20}
             {...register('title')}
           />
           {errors.title && (

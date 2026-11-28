@@ -1,9 +1,10 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
 import { crearPlaylistSchema, type CrearPlaylistValues } from '../schemas/perfilSchema';
 import { createUserPlaylist } from '../services/storageServices';
+import { ImagePicker } from './ImagePicker';
 import './CrearPlaylistModal.css';
 
 interface CrearPlaylistModalProps {
@@ -23,6 +24,8 @@ export function CrearPlaylistModal({
     register,
     handleSubmit,
     reset,
+    setValue,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CrearPlaylistValues>({
     resolver: zodResolver(crearPlaylistSchema),
@@ -32,6 +35,8 @@ export function CrearPlaylistModal({
       cover: '',
     },
   });
+
+  const coverPreview = useWatch({ control, name: 'cover' });
 
   if (!abierto) return null;
 
@@ -81,6 +86,8 @@ export function CrearPlaylistModal({
               type="text"
               className="playlist-modal__input"
               placeholder="Ej. Mis favoritas para entrenar"
+              minLength={3}
+              maxLength={20}
               {...register('title')}
             />
             {errors.title && (
@@ -97,6 +104,8 @@ export function CrearPlaylistModal({
               rows={3}
               className="playlist-modal__textarea"
               placeholder="Contá de qué va esta lista..."
+              minLength={3}
+              maxLength={20}
               {...register('description')}
             />
             {errors.description && (
@@ -105,15 +114,19 @@ export function CrearPlaylistModal({
           </div>
 
           <div className="playlist-modal__field">
-            <label htmlFor="pl-cover" className="playlist-modal__label">
-              URL de portada (opcional)
+            <label htmlFor="pl-cover-file" className="playlist-modal__label">
+              Portada (opcional)
             </label>
-            <input
+            <ImagePicker
               id="pl-cover"
-              type="url"
-              className="playlist-modal__input"
-              placeholder="https://..."
-              {...register('cover')}
+              variant="cover"
+              value={coverPreview ?? ''}
+              onChange={(value) =>
+                setValue('cover', value, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
             />
             {errors.cover && (
               <span className="playlist-modal__error">{errors.cover.message}</span>

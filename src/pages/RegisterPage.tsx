@@ -160,6 +160,8 @@ export function RegisterPage() {
             type="text"
             autoComplete="username"
             placeholder="ej. musiclover"
+            minLength={3}
+            maxLength={20}
             aria-invalid={Boolean(errors.username)}
             aria-describedby={errors.username ? 'register-username-error' : undefined}
             className={`auth-form__input${errors.username ? ' auth-form__input--error' : ''}`}
@@ -176,6 +178,8 @@ export function RegisterPage() {
             type="email"
             autoComplete="email"
             placeholder="ejemplo@streaming.com"
+            minLength={3}
+            maxLength={60}
             aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? 'register-email-error' : undefined}
             className={`auth-form__input${errors.email ? ' auth-form__input--error' : ''}`}
@@ -261,7 +265,7 @@ export function RegisterPage() {
           id="register-password"
           label="Contraseña"
           autoComplete="new-password"
-          placeholder="Mínimo 8 caracteres, letra y número"
+          placeholder="Mínimo 3 caracteres, letra y número"
           error={errors.password?.message}
           {...register('password')}
         />

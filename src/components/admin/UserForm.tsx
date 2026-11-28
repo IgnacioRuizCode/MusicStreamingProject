@@ -6,6 +6,8 @@ import {
   type AdminUserFormData,
 } from '../../schemas/adminUserSchema';
 import type { Plan, User } from '../../types/types';
+import { obtenerIniciales } from '../../utils/obtenerIniciales';
+import { ImagePicker } from '../ImagePicker';
 import { ImagePreview } from './ImagePreview';
 
 interface UserFormProps {
@@ -28,6 +30,7 @@ export function UserForm({
     handleSubmit,
     reset,
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<AdminUserFormData>({
     resolver: zodResolver(adminUserSchema),
@@ -70,6 +73,8 @@ export function UserForm({
             id="usuario-nombre"
             type="text"
             className="admin-input"
+            minLength={3}
+            maxLength={20}
             {...register('username')}
           />
           {errors.username && (
@@ -86,6 +91,8 @@ export function UserForm({
             type="email"
             className="admin-input"
             value={usuario.email}
+            minLength={3}
+            maxLength={60}
             disabled
           />
           <span className="admin-form__hint">El correo no se edita desde el panel.</span>
@@ -131,15 +138,20 @@ export function UserForm({
         </div>
 
         <div className="admin-form__field admin-form__field--full">
-          <label className="admin-form__label" htmlFor="usuario-avatar">
+          <label className="admin-form__label" htmlFor="usuario-avatar-file">
             Avatar
           </label>
-          <input
+          <ImagePicker
             id="usuario-avatar"
-            type="text"
-            className="admin-input"
-            placeholder="https://... (opcional)"
-            {...register('avatar')}
+            variant="avatar"
+            value={avatar ?? ''}
+            fallbackText={obtenerIniciales(nombre || usuario.username)}
+            onChange={(value) =>
+              setValue('avatar', value, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
           />
           {errors.avatar && (
             <span className="admin-form__error">{errors.avatar.message}</span>

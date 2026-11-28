@@ -38,13 +38,20 @@ export type PerfilValues = z.infer<typeof perfilSchema>;
 
 export const cambioPasswordSchema = z
   .object({
-    currentPassword: z.string().min(1, 'Ingresá tu contraseña actual'),
+    currentPassword: z
+      .string()
+      .min(3, 'La contraseña debe tener al menos 3 caracteres')
+      .max(15, 'La contraseña no puede superar los 15 caracteres'),
     newPassword: z
       .string()
-      .min(8, 'La nueva contraseña debe tener al menos 8 caracteres')
+      .min(3, 'La nueva contraseña debe tener al menos 3 caracteres')
+      .max(15, 'La contraseña no puede superar los 15 caracteres')
       .regex(/[A-Za-z]/, 'Debe incluir al menos una letra')
       .regex(/\d/, 'Debe incluir al menos un número'),
-    confirmNewPassword: z.string().min(1, 'Confirmá la nueva contraseña'),
+    confirmNewPassword: z
+      .string()
+      .min(3, 'Confirmá la contraseña (mín. 3 caracteres)')
+      .max(15, 'La confirmación no puede superar los 15 caracteres'),
   })
   .refine((values) => values.newPassword === values.confirmNewPassword, {
     message: 'Las contraseñas no coinciden',
@@ -61,12 +68,13 @@ export const invitadoPlanSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, 'Ingresá el nombre del invitado (mín. 2 caracteres)')
-    .max(40, 'El nombre no puede superar los 40 caracteres'),
+    .min(3, 'Ingresá el nombre del invitado (mín. 3 caracteres)')
+    .max(20, 'El nombre no puede superar los 20 caracteres'),
   email: z
     .string()
     .trim()
-    .min(1, 'Ingresá el correo electrónico del invitado')
+    .min(3, 'El correo debe tener al menos 3 caracteres')
+    .max(60, 'El correo no puede superar los 60 caracteres')
     .email('Ingresá un correo válido'),
 });
 
@@ -76,19 +84,23 @@ export const crearPlaylistSchema = z.object({
   title: z
     .string()
     .trim()
-    .min(2, 'El título debe tener al menos 2 caracteres')
-    .max(50, 'El título no puede superar los 50 caracteres'),
+    .min(3, 'El título debe tener al menos 3 caracteres')
+    .max(20, 'El título no puede superar los 20 caracteres'),
   description: z
     .string()
     .trim()
-    .max(160, 'La descripción no puede superar los 160 caracteres')
+    .min(3, 'La descripción debe tener al menos 3 caracteres')
+    .max(20, 'La descripción no puede superar los 20 caracteres')
     .optional()
     .or(z.literal('')),
   cover: z
     .string()
     .trim()
     .refine(
-      (val) => val === '' || /^https?:\/\/.+/i.test(val),
+      (val) =>
+        val === '' ||
+        /^https?:\/\/.+/i.test(val) ||
+        val.startsWith('data:image/'),
       'Ingresá una URL válida de imagen o dejalo vacío',
     )
     .optional()

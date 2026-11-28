@@ -38,15 +38,8 @@ import { CardPlaylist } from '../components/cardplaylist/CardPlaylist';
 import { ArtistCard } from '../components/ArtistCard/ArtistCard';
 import { ConfirmationModal } from '../components/admin/ConfirmationModal';
 import { CrearPlaylistModal } from '../components/CrearPlaylistModal';
+import { ImagePicker } from '../components/ImagePicker';
 import './PerfilPage.css';
-
-const AVATAR_PRESETS = [
-  'https://api.dicebear.com/9.x/thumbs/svg?seed=CodifyBeat',
-  'https://api.dicebear.com/9.x/thumbs/svg?seed=MelodyWave',
-  'https://api.dicebear.com/9.x/thumbs/svg?seed=BassDrop',
-  'https://api.dicebear.com/9.x/thumbs/svg?seed=NightGroove',
-  'https://api.dicebear.com/9.x/thumbs/svg?seed=SynthPulse',
-];
 
 function getMaxInvitadosPorPlan(planId: string | null): number {
   if (planId === 'plan-duo') return 1;
@@ -316,7 +309,14 @@ export function PerfilPage() {
             >
               <div className="perfil-field">
                 <label htmlFor="perfil-email">Correo electrónico (no editable)</label>
-                <input id="perfil-email" type="email" value={user.email} disabled />
+                <input
+                  id="perfil-email"
+                  type="email"
+                  value={user.email}
+                  minLength={3}
+                  maxLength={60}
+                  disabled
+                />
               </div>
 
               <div className="perfil-field">
@@ -324,6 +324,8 @@ export function PerfilPage() {
                 <input
                   id="perfil-username"
                   type="text"
+                  minLength={3}
+                  maxLength={20}
                   {...profileForm.register('username')}
                 />
                 {profileForm.formState.errors.username && (
@@ -348,48 +350,24 @@ export function PerfilPage() {
               </div>
 
               <div className="perfil-field">
-                <label htmlFor="perfil-avatar">
-                  Foto de perfil (URL o elegí un avatar)
-                </label>
-                <input
+                <label htmlFor="perfil-avatar-file">Foto de perfil</label>
+                <ImagePicker
                   id="perfil-avatar"
-                  type="url"
-                  placeholder="Dejalo vacío para usar tus iniciales"
-                  {...profileForm.register('avatar')}
+                  variant="avatar"
+                  value={currentAvatarPreview ?? ''}
+                  fallbackText={obtenerIniciales(user.username)}
+                  onChange={(value) =>
+                    profileForm.setValue('avatar', value, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
                 />
                 {profileForm.formState.errors.avatar && (
                   <span className="perfil-error">
                     {profileForm.formState.errors.avatar.message}
                   </span>
                 )}
-
-                <div className="perfil-presets">
-                  <button
-                    type="button"
-                    className={`perfil-preset-btn${!currentAvatarPreview ? ' is-selected' : ''}`}
-                    title="Usar iniciales"
-                    onClick={() =>
-                      profileForm.setValue('avatar', '', { shouldDirty: true })
-                    }
-                  >
-                    <span className="perfil-preset-btn__initials">
-                      {obtenerIniciales(user.username)}
-                    </span>
-                  </button>
-                  {AVATAR_PRESETS.map((presetUrl, index) => (
-                    <button
-                      key={presetUrl}
-                      type="button"
-                      className={`perfil-preset-btn${currentAvatarPreview === presetUrl ? ' is-selected' : ''}`}
-                      title={`Avatar predefinido ${index + 1}`}
-                      onClick={() =>
-                        profileForm.setValue('avatar', presetUrl, { shouldDirty: true })
-                      }
-                    >
-                      <img src={presetUrl} alt={`Preset ${index + 1}`} />
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div className="perfil-form__actions">
@@ -433,6 +411,8 @@ export function PerfilPage() {
                 <input
                   id="pwd-current"
                   type={showCurrentPwd ? 'text' : 'password'}
+                  minLength={3}
+                  maxLength={15}
                   {...passwordForm.register('currentPassword')}
                 />
                 <button
@@ -457,6 +437,8 @@ export function PerfilPage() {
                 <input
                   id="pwd-new"
                   type={showNewPwd ? 'text' : 'password'}
+                  minLength={3}
+                  maxLength={15}
                   {...passwordForm.register('newPassword')}
                 />
                 <button
@@ -480,6 +462,8 @@ export function PerfilPage() {
               <input
                 id="pwd-confirm"
                 type={showNewPwd ? 'text' : 'password'}
+                minLength={3}
+                maxLength={15}
                 {...passwordForm.register('confirmNewPassword')}
               />
               {passwordForm.formState.errors.confirmNewPassword && (
@@ -578,6 +562,8 @@ export function PerfilPage() {
                           type="text"
                           placeholder="Nombre del invitado"
                           aria-label="Nombre del invitado"
+                          minLength={3}
+                          maxLength={20}
                           {...inviteForm.register('name')}
                         />
                         {inviteForm.formState.errors.name && (
@@ -592,6 +578,8 @@ export function PerfilPage() {
                           type="email"
                           placeholder="correo@ejemplo.com"
                           aria-label="Correo del invitado"
+                          minLength={3}
+                          maxLength={60}
                           {...inviteForm.register('email')}
                         />
                         {inviteForm.formState.errors.email && (
@@ -825,6 +813,8 @@ export function PerfilPage() {
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder={user.username}
+                minLength={3}
+                maxLength={20}
               />
             </div>
             <div className="perfil-modal__actions">

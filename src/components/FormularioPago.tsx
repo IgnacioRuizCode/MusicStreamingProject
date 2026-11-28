@@ -108,7 +108,8 @@ export function FormularioPago({ plan, onSuccess }: FormularioPagoProps) {
           etiqueta="Titular"
           placeholder="Nombre y apellido"
           autoComplete="cc-name"
-          maxLength={60}
+          minLength={3}
+          maxLength={20}
           error={errors.titular?.message}
           {...titularField}
           onFocus={() => setFocused('name')}

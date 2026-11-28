@@ -6,6 +6,7 @@ import {
   type AdminPlaylistFormData,
 } from '../../schemas/adminPlaylistSchema';
 import type { Artist, Playlist, Song, User } from '../../types/types';
+import { ImagePicker } from '../ImagePicker';
 import { ImagePreview } from './ImagePreview';
 
 interface PlaylistFormProps {
@@ -34,6 +35,7 @@ export function PlaylistForm({
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<AdminPlaylistFormData>({
     resolver: zodResolver(adminPlaylistSchema),
@@ -76,7 +78,7 @@ export function PlaylistForm({
   const onSubmit = (data: AdminPlaylistFormData) => {
     onGuardar({
       title: data.title.trim(),
-      description: data.description?.trim() || 'Playlist curada por el equipo de Codify.',
+      description: data.description?.trim() || 'Playlist curada',
       cover:
         data.cover?.trim() ||
         'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80',
@@ -105,6 +107,8 @@ export function PlaylistForm({
             type="text"
             className="admin-input"
             placeholder="Ej. Éxitos del indie"
+            minLength={3}
+            maxLength={20}
             {...register('title')}
           />
           {errors.title && (
@@ -120,6 +124,8 @@ export function PlaylistForm({
             id="playlist-descripcion"
             className="admin-textarea"
             placeholder="Una descripción breve de la playlist"
+            minLength={3}
+            maxLength={20}
             {...register('description')}
           />
           {errors.description && (
@@ -148,16 +154,20 @@ export function PlaylistForm({
           )}
         </div>
 
-        <div className="admin-form__field">
-          <label className="admin-form__label" htmlFor="playlist-portada">
+        <div className="admin-form__field admin-form__field--full">
+          <label className="admin-form__label" htmlFor="playlist-portada-file">
             Portada
           </label>
-          <input
+          <ImagePicker
             id="playlist-portada"
-            type="text"
-            className="admin-input"
-            placeholder="https://... (opcional)"
-            {...register('cover')}
+            variant="cover"
+            value={portada ?? ''}
+            onChange={(value) =>
+              setValue('cover', value, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
           />
           {errors.cover && (
             <span className="admin-form__error">{errors.cover.message}</span>

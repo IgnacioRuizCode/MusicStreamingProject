@@ -29,6 +29,8 @@ export function PasswordField({
             error ? ' auth-form__input--error' : ''
           } ${className}`.trim()}
           {...inputProps}
+          minLength={3}
+          maxLength={15}
         />
         <button
           type="button"

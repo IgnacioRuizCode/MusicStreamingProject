@@ -66,6 +66,8 @@ export function PlanForm({
         <input
           id="plan-nombre"
           type="text"
+          minLength={3}
+          maxLength={20}
           {...register('nombre')}
           className="formulario-plan__input"
         />
@@ -112,6 +114,8 @@ export function PlanForm({
                 <input
                   type="text"
                   placeholder={`Beneficio ${index + 1}`}
+                  minLength={3}
+                  maxLength={20}
                   {...register(`beneficios.${index}.value`)}
                   className="formulario-plan__input"
                 />

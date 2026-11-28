@@ -4,8 +4,8 @@ export const adminSongSchema = z.object({
   title: z
     .string()
     .trim()
-    .min(2, 'El título debe tener al menos 2 caracteres')
-    .max(80, 'El título no puede superar los 80 caracteres'),
+    .min(3, 'El título debe tener al menos 3 caracteres')
+    .max(20, 'El título no puede superar los 20 caracteres'),
   artistId: z.string().min(1, 'Seleccioná un artista'),
   cover: z.url('Ingresá una URL válida para la portada'),
   url: z.url('Ingresá una URL válida para el audio'),

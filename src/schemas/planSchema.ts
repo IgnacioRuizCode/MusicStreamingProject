@@ -4,8 +4,8 @@ export const planSchema = z.object({
   nombre: z
     .string()
     .trim()
-    .min(2, 'El nombre debe tener al menos 2 caracteres')
-    .max(60, 'El nombre no puede superar los 60 caracteres'),
+    .min(3, 'El nombre debe tener al menos 3 caracteres')
+    .max(20, 'El nombre no puede superar los 20 caracteres'),
   precio: z
     .number({ message: 'Debe ser un número válido' })
     .min(0, 'El precio no puede ser negativo'),
@@ -13,7 +13,11 @@ export const planSchema = z.object({
   beneficios: z
     .array(
       z.object({
-        value: z.string().trim().min(2, 'El beneficio no puede estar vacío'),
+        value: z
+          .string()
+          .trim()
+          .min(3, 'El beneficio debe tener al menos 3 caracteres')
+          .max(20, 'El beneficio no puede superar los 20 caracteres'),
       })
     )
     .min(1, 'Agregá al menos un beneficio'),

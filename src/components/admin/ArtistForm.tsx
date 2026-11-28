@@ -62,6 +62,8 @@ export function ArtistForm({
             type="text"
             className="admin-input"
             placeholder="Ej. Daft Punk"
+            minLength={3}
+            maxLength={20}
             {...register('name')}
           />
           {errors.name && (
