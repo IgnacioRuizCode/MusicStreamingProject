@@ -30,7 +30,7 @@ export function AdminSearch({
       </svg>
       <input
         type="search"
-        className="admin-input"
+        className="admin-search__input"
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}

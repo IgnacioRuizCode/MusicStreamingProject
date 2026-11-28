@@ -138,6 +138,8 @@ const HomeArtistCard = memo(function HomeArtistCard({
             </span>
             <h3 className="home-flip-card__back-title">{artist.name}</h3>
             <p className="home-flip-card__back-desc">
+              {artist.songIds.length}{' '}
+              {artist.songIds.length === 1 ? 'canción' : 'canciones'} ·{' '}
               {artist.monthlyListeners.toLocaleString('es-AR')} oyentes mensuales
             </p>
           </div>

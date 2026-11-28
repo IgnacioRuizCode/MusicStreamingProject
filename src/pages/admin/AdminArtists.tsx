@@ -6,6 +6,7 @@ import { ConfirmationModal } from '../../components/admin/ConfirmationModal';
 import { AdminModal } from '../../components/admin/AdminModal';
 import { AdminSearch } from '../../components/admin/AdminSearch';
 import { ImagePreview } from '../../components/admin/ImagePreview';
+import { SongCountBadge } from '../../components/admin/SongCountBadge';
 import { ArtistForm } from '../../components/admin/ArtistForm';
 import { useDebounce } from '../../hooks/useDebounce';
 import type { ArtistFormData } from '../../schemas/artistSchema';
@@ -118,9 +119,7 @@ export function AdminArtists() {
     {
       key: 'songs',
       header: 'Canciones',
-      render: (artista) => (
-        <span className="admin-badge">{artista.songIds.length}</span>
-      ),
+      render: (artista) => <SongCountBadge count={artista.songIds.length} />,
     },
   ];
 

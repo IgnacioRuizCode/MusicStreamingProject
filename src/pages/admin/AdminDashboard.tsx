@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ImagePreview } from '../../components/admin/ImagePreview';
+import { SongCountBadge } from '../../components/admin/SongCountBadge';
 import { getAll } from '../../services/storageServices';
 
 interface Kpi {
@@ -240,7 +241,7 @@ export function AdminDashboard() {
                       {artista.monthlyListeners.toLocaleString('es-AR')} oyentes
                     </span>
                   </span>
-                  <span className="admin-badge">{artista.songIds.length}</span>
+                  <SongCountBadge count={artista.songIds.length} />
                 </li>
               ))}
             </ul>

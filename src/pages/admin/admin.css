@@ -41,6 +41,7 @@
   justify-content: space-between;
   gap: 0.9rem;
   flex-wrap: wrap;
+  min-width: 0;
   padding: 0.9rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
@@ -54,26 +55,56 @@
   gap: 0.65rem;
   flex-wrap: wrap;
   flex: 1 1 320px;
+  min-width: 0;
 }
 
 .admin-search {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   flex: 1 1 240px;
-  min-width: 190px;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.04);
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.admin-search:focus-within {
+  border-color: rgba(139, 92, 246, 0.7);
+  background-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18);
 }
 
 .admin-search__icon {
-  position: absolute;
-  top: 50%;
-  left: 0.9rem;
-  transform: translateY(-50%);
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
   color: var(--text-muted, #727272);
   pointer-events: none;
 }
 
-.admin-search .admin-input {
+.admin-search__input {
+  flex: 1 1 auto;
   width: 100%;
-  padding-left: 2.35rem;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-primary, #ffffff);
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.admin-search__input::placeholder {
+  color: var(--text-muted, #727272);
 }
 
 .admin-input,
@@ -207,6 +238,26 @@
   border-color: rgba(248, 113, 113, 0.3);
   background-color: rgba(220, 38, 38, 0.14);
   color: #fca5a5;
+}
+
+.admin-song-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+  padding: 0.22rem 0.6rem;
+  border: 1px solid rgba(139, 92, 246, 0.24);
+  border-radius: 999px;
+  background-color: rgba(139, 92, 246, 0.12);
+  color: #c4b5fd;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.admin-song-count svg {
+  flex: 0 0 auto;
+  opacity: 0.9;
 }
 
 .admin-thumb {
@@ -681,6 +732,11 @@
   .admin-toolbar__group {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .admin-search {
+    flex: 1 1 100%;
+    width: 100%;
   }
 
   .admin-select {

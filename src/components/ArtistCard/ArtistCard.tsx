@@ -66,6 +66,12 @@ export function ArtistCard({
             </span>
             <h3 className="artist-card__back-title">{name}</h3>
             <p className="artist-card__type">
+              {typeof songIds?.length === 'number' && (
+                <>
+                  {songIds.length}{' '}
+                  {songIds.length === 1 ? 'canción' : 'canciones'} ·{' '}
+                </>
+              )}
               {typeof monthlyListeners === 'number'
                 ? `${monthlyListeners.toLocaleString('es-AR')} oyentes mensuales`
                 : 'Artista en tu biblioteca'}
